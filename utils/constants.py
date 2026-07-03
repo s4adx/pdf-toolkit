@@ -1,46 +1,56 @@
-
+# ==========================
 # WINDOW
+# ==========================
+
 class Window:
     TITLE = "PDF Toolkit"
 
-    WIDTH = 1000
-    HEIGHT = 650
+    WIDTH = 800
+    HEIGHT = 600
 
     ICON = None
 
+
+# ==========================
 # COLORS
+# ==========================
+
 class Colors:
 
     # Main
-    BACKGROUND = "#F5F7FA"
-    SURFACE = "#FFFFFF"
+    BACKGROUND = "#1E293B"
+    SURFACE = "#334155"
 
     # Primary
-    PRIMARY = "#2563EB"
-    PRIMARY_HOVER = "#1D4ED8"
+    PRIMARY = "#60A5FA"
+    PRIMARY_HOVER = "#3B82F6"
 
     # Text
-    TEXT_PRIMARY = "#1F2937"
-    TEXT_SECONDARY = "#6B7280"
+    TEXT_PRIMARY = "#F8FAFC"
+    TEXT_SECONDARY = "#CBD5E1"
 
     # Borders
-    BORDER = "#D1D5DB"
+    BORDER = "#475569"
 
     # Status
-    SUCCESS = "#16A34A"
-    ERROR = "#DC2626"
+    SUCCESS = "#22C55E"
+    ERROR = "#EF4444"
     WARNING = "#F59E0B"
 
     # Cards
-    CARD = "#FFFFFF"
-    CARD_HOVER = "#EEF4FF"
+    CARD = "#334155"
+    CARD_HOVER = "#475569"
 
 
+# ==========================
 # FONTS
+# ==========================
+
 class Fonts:
 
     FAMILY = "Segoe UI"
-    TITLE = (FAMILY, 22, "bold")
+
+    TITLE = (FAMILY, 24, "bold")
     HEADING = (FAMILY, 16, "bold")
     SUBHEADING = (FAMILY, 13, "bold")
     BODY = (FAMILY, 11)
@@ -48,7 +58,10 @@ class Fonts:
     BUTTON = (FAMILY, 11, "bold")
 
 
+# ==========================
 # SPACING
+# ==========================
+
 class Spacing:
 
     XS = 5
@@ -58,16 +71,22 @@ class Spacing:
     XL = 40
 
 
+# ==========================
 # BUTTONS
+# ==========================
+
 class ButtonStyle:
 
     WIDTH = 18
     HEIGHT = 2
 
 
+# ==========================
 # TOOL CARDS
+# ==========================
+
 class CardStyle:
 
-    WIDTH = 220
-    HEIGHT = 120
+    WIDTH = 170
+    HEIGHT = 130
     PADDING = 15

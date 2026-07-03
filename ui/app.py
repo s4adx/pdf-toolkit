@@ -41,6 +41,9 @@ class PDFToolkitApp:
         )
         self.page_container.grid(row=0, column=0, sticky="nsew")
 
+        self.page_container.rowconfigure(0, weight=1)
+        self.page_container.columnconfigure(0, weight=1)
+
 
     def run(self):
         self.root.mainloop()
