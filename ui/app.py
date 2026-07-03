@@ -1,4 +1,5 @@
 import tkinter as tk
+from ui.page_manager import PageManager
 from utils.constants import Window, Colors
 
 class PDFToolkitApp:
@@ -8,9 +9,9 @@ class PDFToolkitApp:
 
         self._configure_window()
         self._create_page_container()
+        self.page_manager = PageManager(self.page_container)
 
         
-
     def _configure_window(self):
         self.root.title(Window.TITLE)
 
