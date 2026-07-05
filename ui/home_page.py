@@ -5,8 +5,8 @@ from ui.tools_card import ToolCard
 
 class HomePage(BasePage):
 
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self, parent, page_manager):
+        super().__init__(parent, page_manager)
         self._create_widgets()
         
 
@@ -80,7 +80,7 @@ class HomePage(BasePage):
                 cards_frame,
                 text=text,
                 icon=icon,
-                command=lambda page=page_name: print(page)
+                command=lambda page=page_name: self.page_manager.show_page(page)
             )
 
             card.grid(
