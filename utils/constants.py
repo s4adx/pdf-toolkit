@@ -6,7 +6,7 @@ class Window:
     TITLE = "PDF Toolkit"
 
     WIDTH = 800
-    HEIGHT = 550
+    HEIGHT = 600
 
     ICON = None
 
