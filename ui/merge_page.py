@@ -1,6 +1,9 @@
 import tkinter as tk
+from pathlib import Path
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
+from utils.file_dialog import select_pdf_files, select_save_path
+from backend.merge import merge_pdfs
 
 
 class MergePage(BasePage):
@@ -15,6 +18,8 @@ class MergePage(BasePage):
         self._create_status_bar()
         self._bind_events()
         
+        self.selected_files = []
+
 
     def _create_widgets(self):
         self._create_header()
@@ -169,7 +174,7 @@ class MergePage(BasePage):
             button_frame,
             text="Add PDFs",
             width=15,
-            command=lambda: print("File added")
+            command=self._add_pdfs
         )
 
         self.add_button.pack(
@@ -181,7 +186,7 @@ class MergePage(BasePage):
             button_frame,
             text="Remove Selected",
             width=15,
-            command=lambda: print("File removed")
+            command=self._remove_selected
         )
 
         self.remove_button.pack(
@@ -205,7 +210,7 @@ class MergePage(BasePage):
             action_frame,
             text="Merge PDFs",
             width=20,
-            command=lambda: print("PDFs merged")
+            command=self.merge_pdfs
         )
 
         self.merge_button.pack()
@@ -253,11 +258,66 @@ class MergePage(BasePage):
         self.back_arrow.config(fg=Colors.TEXT_PRIMARY)
         self.back.config(fg=Colors.TEXT_PRIMARY)
 
+    
+    def _add_pdfs(self):
+        files = select_pdf_files() 
 
+        self._append_files(files)
+
+
+    def _add_selected_files(self, files):
+        if not files:
+            return
+
+        self.selected_files.extend(files)
+        self._update_listbox()
+
+
+    def _update_listbox(self):
+        self.file_listbox.delete(0, tk.END)
+
+        for file in self.selected_files:
+            self.file_listbox.insert(tk.END, Path(file).name)
+
+        if not self.selected_files:
+            self.file_listbox.insert(tk.END, "No PDF files selected.")
+
+
+    def _remove_selected(self):
+        selection = self.file_listbox.curselection()
+
+        if not selection:
+            return
+
+        index = selection[0]
+
+        if index >= len(self.selected_files):
+            return
+
+        self.selected_files.pop(index) 
+        self._update_listbox()
+
+
+    def _merge_pdfs(self):
+        if len(self.selected_files) < 2:
+            return
         
+        save_path = select_save_path()
+
+        if not save_path:
+            return
+        
+        success = merge_pdfs(
+            self.selected_files,
+            save_path
+        )
+
+        if success:
+            self.status_label.config(
+                text="PDFs merged successfully"
+            )
 
 
 
-
-
-
+    
+    
