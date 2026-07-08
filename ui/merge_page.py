@@ -210,7 +210,7 @@ class MergePage(BasePage):
             action_frame,
             text="Merge PDFs",
             width=20,
-            command=self.merge_pdfs
+            command=self._merge_pdfs
         )
 
         self.merge_button.pack()
@@ -262,7 +262,7 @@ class MergePage(BasePage):
     def _add_pdfs(self):
         files = select_pdf_files() 
 
-        self._append_files(files)
+        self._add_selected_files(files)
 
 
     def _add_selected_files(self, files):
