@@ -19,10 +19,7 @@ class MergePage(BasePage):
         self._bind_events()
         
         self.selected_files = []
-
-
-    def _create_widgets(self):
-        self._create_header()
+        self.status_timer = None
         
 
     def _create_header(self):
@@ -188,7 +185,7 @@ class MergePage(BasePage):
             width=15,
             command=self._remove_selected
         )
-
+        self.remove_button.config(state="disabled")
         self.remove_button.pack(
             side="left",
             padx=(10, 0)
@@ -212,7 +209,7 @@ class MergePage(BasePage):
             width=20,
             command=self._merge_pdfs
         )
-
+        self.merge_button.config(state="disabled")
         self.merge_button.pack()
 
 
@@ -233,15 +230,15 @@ class MergePage(BasePage):
 
 
     def _bind_events(self):
-            widgets = [
-                self.back_arrow,
-                self.back
-            ]
+        widgets = [
+            self.back_arrow,
+            self.back
+        ]
 
-            for widget in widgets:
-                widget.bind("<Button-1>", self._on_click)
-                widget.bind("<Enter>", self._on_enter)
-                widget.bind("<Leave>", self._on_leave)
+        for widget in widgets:
+            widget.bind("<Button-1>", self._on_click)
+            widget.bind("<Enter>", self._on_enter)
+            widget.bind("<Leave>", self._on_leave)
             
 
 
@@ -270,7 +267,8 @@ class MergePage(BasePage):
             return
 
         self.selected_files.extend(files)
-        self._update_listbox()
+        self._update_ui()
+        self._update_default_status()
 
 
     def _update_listbox(self):
@@ -295,29 +293,97 @@ class MergePage(BasePage):
             return
 
         self.selected_files.pop(index) 
-        self._update_listbox()
+        self._update_ui()
+        self._update_default_status()
 
 
     def _merge_pdfs(self):
         if len(self.selected_files) < 2:
+            self._update_status(
+                "Select at least two PDF files",
+                Colors.WARNING
+            )
             return
         
         save_path = select_save_path()
 
         if not save_path:
+            self._update_status(
+                "Merge cancelled",
+                Colors.ERROR
+            )
             return
         
+
         success = merge_pdfs(
             self.selected_files,
             save_path
         )
 
         if success:
-            self.status_label.config(
-                text="PDFs merged successfully"
+            self._update_status(
+                "PDFs merged successfully.", 
+                Colors.SUCCESS
+            )
+            self._clear_selection()
+            
+
+        else:
+            self._update_status(
+                "Failed to merge PDFs.", 
+                Colors.ERROR
             )
 
 
+    def _update_status(self, message, color=Colors.TEXT_SECONDARY):
 
+        self.status_label.config(text=message, fg=color)
+
+        # Cancel the previous timer (if one exists)
+        if self.status_timer is not None:
+            self.after_cancel(self.status_timer)
+        
+        # Start a new timer
+        self.status_timer = self.after(
+            3000,
+            self._update_default_status
+        )
+
+
+    def _update_default_status(self):
+        count = len(self.selected_files)
+
+        if count == 0:
+            text = "Ready"
+        elif count == 1:
+            text = "1 PDF selected"
+        else:
+            text = f"{count} PDFs selected"
+
+        self.status_label.config(
+            text=text,
+            fg=Colors.TEXT_SECONDARY
+        )
+            
     
-    
+    def _clear_selection(self):
+        self.selected_files.clear()
+
+        self._update_ui()
+
+
+    def _update_buttons(self):
+        if len(self.selected_files) >= 2:
+            self.merge_button.config(state="normal")
+        else:
+            self.merge_button.config(state="disabled")
+
+        if self.selected_files:
+            self.remove_button.config(state="normal")
+        else:
+            self.remove_button.config(state="disabled")
+
+
+    def _update_ui(self):
+        self._update_listbox()
+        self._update_buttons()
