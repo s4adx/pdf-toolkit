@@ -3,7 +3,7 @@ from ui.merge_page import MergePage
 from ui.split_page import SplitPage
 from ui.rotate_page import RotatePage
 from ui.delete_page import DeletePage
-from ui.extract_page import ExtractPage
+from ui.protect_page import ProtectPage
 from ui.images_to_pdf_page import ImagesToPdfPage
 from ui.pdf_to_images_page import PdfToImagesPage
 from ui.compress_page import CompressPage 
@@ -21,7 +21,7 @@ class PageManager:
             "split": SplitPage,
             "rotate": RotatePage,
             "delete": DeletePage,
-            "extract": ExtractPage,
+            "protect": ProtectPage,
             "images_to_pdf": ImagesToPdfPage,
             "pdf_to_images": PdfToImagesPage,
             "compress": CompressPage,

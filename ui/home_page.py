@@ -65,7 +65,7 @@ class HomePage(BasePage):
             ("Split PDF", "✂️", "split"),
             ("Rotate PDF", "🔄", "rotate"),
             ("Delete Pages", "🗑️", "delete"),
-            ("Extract Pages", "📑", "extract"),
+            ("Protect PDF", "🔒", "protect"),
             ("Images → PDF", "🖼️", "images_to_pdf"),
             ("PDF → Images", "📷", "pdf_to_images"),
             ("Compress PDF", "🗜️", "compress"),
