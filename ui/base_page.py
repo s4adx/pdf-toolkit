@@ -77,6 +77,71 @@ class BasePage(tk.Frame):
             pady=(20, 0)
         )
 
+        self.bind_header_events()
+
     
+    def bind_header_events(self):
+        self.header_widgets = [
+            self.back_arrow,
+            self.back
+        ]
+
+        for widget in self.header_widgets:
+            widget.bind("<Button-1>", self._on_back_click)
+            widget.bind("<Enter>", self._on_back_enter)
+            widget.bind("<Leave>", self._on_back_leave)
+
+    
+    def _on_back_click(self, event):
+        self.page_manager.show_page("home")
+
+
+    def _on_back_enter(self, event):
+        self.back_arrow.config(fg=Colors.PRIMARY, cursor="hand2")
+        self.back.config(fg=Colors.PRIMARY, cursor="hand2")
+    
+
+    def _on_back_leave(self, event):
+        self.back_arrow.config(fg=Colors.TEXT_PRIMARY)
+        self.back.config(fg=Colors.TEXT_PRIMARY)
+
+
     def create_status_bar(self):
-        pass
+
+        self.status_timer = None
+
+        self.status_label = tk.Label(
+            self,
+            text="Ready",
+            bg=Colors.BACKGROUND,
+            fg=Colors.TEXT_SECONDARY,
+            font=Fonts.SMALL
+        )
+
+        self.status_label.pack(
+            anchor="e",
+            padx=10,
+            pady=(0, 10)
+    )
+        
+    
+    def update_status(self, message, color=Colors.TEXT_SECONDARY):
+
+        self.status_label.config(text=message, fg=color)
+
+        # Cancel the previous timer (if one exists)
+        if self.status_timer is not None:
+            self.after_cancel(self.status_timer)
+        
+        # Start a new timer
+        self.status_timer = self.after(
+            3000,
+            self._update_default_status
+        )
+
+
+    def update_default_status(self):
+        self.status_label.config(
+            text="Ready",
+            fg=Colors.TEXT_SECONDARY
+        )

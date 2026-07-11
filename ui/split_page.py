@@ -17,7 +17,7 @@ class SplitPage(BasePage):
         self._bind_events()
         
         self.selected_file = None
-        self.status_timer = None
+        # self.status_timer = None
         
 
     def _create_header(self):
