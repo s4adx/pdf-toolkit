@@ -1,6 +1,7 @@
 from pypdf import PdfWriter
 
 def merge_pdfs(input_files, output_path):
+    merger = None
 
     try:
         merger = PdfWriter()
@@ -14,8 +15,9 @@ def merge_pdfs(input_files, output_path):
         return True
 
     except Exception as e:
-        print(e)
+        print(e)    # Print error in terminal for easier debugigng
         return False
     
     finally:
-        merger.close()
+        if merger is not None:     
+            merger.close()

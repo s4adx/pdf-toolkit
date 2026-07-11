@@ -1,6 +1,5 @@
-# ==========================
+
 # WINDOW
-# ==========================
 
 class Window:
     TITLE = "PDF Toolkit"
@@ -11,9 +10,8 @@ class Window:
     ICON = None
 
 
-# ==========================
+
 # COLORS
-# ==========================
 
 class Colors:
 
@@ -42,9 +40,7 @@ class Colors:
     CARD_HOVER = "#475569"
 
 
-# ==========================
 # FONTS
-# ==========================
 
 class Fonts:
 
@@ -58,9 +54,7 @@ class Fonts:
     BUTTON = (FAMILY, 11, "bold")
 
 
-# ==========================
 # SPACING
-# ==========================
 
 class Spacing:
 
@@ -71,9 +65,7 @@ class Spacing:
     XL = 40
 
 
-# ==========================
 # BUTTONS
-# ==========================
 
 class ButtonStyle:
 
@@ -81,9 +73,7 @@ class ButtonStyle:
     HEIGHT = 2
 
 
-# ==========================
 # TOOL CARDS
-# ==========================
 
 class CardStyle:
 
