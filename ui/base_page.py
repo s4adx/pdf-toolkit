@@ -53,14 +53,14 @@ class BasePage(tk.Frame):
         title_label.grid(row=1, column=0, columnspan=2, sticky="w", pady=(0, 5))
 
 
-        subtitle_title = tk.Label(
+        subtitle_label = tk.Label(
             self.header_frame,
             text=subtitle,
             bg=Colors.BACKGROUND,
             fg=Colors.TEXT_SECONDARY,
             font=Fonts.BODY
         )
-        subtitle_title.grid(row=2, column=0, columnspan=2, sticky="w")
+        subtitle_label.grid(row=2, column=0, columnspan=2, sticky="w")
 
 
         divider = tk.Frame(
@@ -136,7 +136,7 @@ class BasePage(tk.Frame):
         # Start a new timer
         self.status_timer = self.after(
             3000,
-            self._update_default_status
+            self.update_default_status
         )
 
 
