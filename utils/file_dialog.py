@@ -14,6 +14,18 @@ def select_pdf_files():
     else:
         return
     
+def select_pdf_file():
+    file_path = filedialog.askopenfilename(
+        title="Select PDF File",
+        filetypes=[("PDF File", "*.pdf")]
+    )
+
+    if file_path:
+        return file_path
+    
+    else:
+        return
+    
 
 def select_save_path():
     downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")  # Find system's default Downloads folder
