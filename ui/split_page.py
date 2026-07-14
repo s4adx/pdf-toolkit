@@ -3,6 +3,7 @@ from pathlib import Path
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts 
 from utils.file_dialog import select_pdf_file
+from utils.helpers import count_pdf_pages
 
 
 class SplitPage(BasePage):
@@ -338,6 +339,7 @@ class SplitPage(BasePage):
         
         self.selected_file = file
         self.pdf_name.config(text=f"{Path(file).name}")
+        count_pdf_pages(self.selected_file)
 
     
     def _on_mode_change(self):
