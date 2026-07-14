@@ -12,6 +12,7 @@ class SplitPage(BasePage):
         super().__init__(parent, page_manager)
 
         self.selected_file = None
+        self.total_pages = 0
 
         self.create_header(
             title="Split PDF",
@@ -320,7 +321,8 @@ class SplitPage(BasePage):
         self.split_button = tk.Button(
             action_frame,
             text="Split PDF",
-            width=20
+            width=20,
+            command=self._process_pdf
         )
 
         self.split_button.config(state="disabled")
@@ -330,21 +332,57 @@ class SplitPage(BasePage):
     def _select_pdf(self):
         file = select_pdf_file()
 
-        self._display_selected_file(file)
-
-
-    def _display_selected_file(self, file):
         if not file:
             return
-        
+
         self.selected_file = file
-        self.pdf_name.config(text=f"{Path(file).name}")
-        count_pdf_pages(self.selected_file)
+        self.pdf_name.config(text=Path(file).name)
+
+        self._load_pdf_info()
+
+
+    def _load_pdf_info(self):
+        self.total_pages = count_pdf_pages(self.selected_file)
+
+        self._update_spinbox_ranges()
+        self.update_default_status()
+
+        self.split_button.config(state="normal")
+
+
+    def _update_spinbox_ranges(self):
+        if not self.total_pages:
+            return
+        
+        selected_mode = self.split_mode.get()
+
+        if selected_mode == "split":
+            self.split_page_spinbox.config(to=self.total_pages)
+
+        elif selected_mode == "extract":
+            self.start_page_spinbox.config(to=self.total_pages)
+            self.end_page_spinbox.config(to=self.total_pages)
+
+            self.end_page_spinbox.delete(0, tk.END)
+            self.end_page_spinbox.insert(0, str(self.total_pages))
+
+    
+    def _update_action_button(self):
+        selected_mode = self.split_mode.get()
+
+        button_text = {
+            "split": "Split PDF",
+            "extract": "Extract PDF",
+            "every": "Split Every Page"
+        }
+
+        self.split_button.config(text=button_text[selected_mode])
 
     
     def _on_mode_change(self):
-        self.clear_validation_message()
+        self._clear_validation_message()
         self._update_settings_section()
+        self._update_action_button()
 
 
     def _update_settings_section(self):
@@ -361,7 +399,9 @@ class SplitPage(BasePage):
 
         else:
             self._show_every_page_settings()
-    
+
+        self._update_spinbox_ranges()
+
 
     def _show_split_settings(self):
         self.setting_title.config(text="Split After Page")
@@ -476,16 +516,106 @@ class SplitPage(BasePage):
         message_label.pack(anchor="w")
 
     
-    def show_validation_message(self, message, color=Colors.ERROR):
+    def _validate_settings(self):
+        if not self.selected_file:
+            self._show_validation_message("Please select a PDF file.")
+            return False
+        
+        selected_mode = self.split_mode.get()
+
+        try:
+            if selected_mode == "split":
+                if self.total_pages < 2:
+                    self.show_validation_message(
+                        "This PDF must have at least 2 pages to be split."
+                    )
+                    return False
+
+                split_page = int(self.split_page_spinbox.get())
+
+                if not 1 <= split_page < self.total_pages:
+                    self._show_validation_message(
+                        f"Split page must be between 1 and {self.total_pages - 1}."
+                    )
+                    return False
+                
+            elif selected_mode == "extract":
+                start_page = int(self.start_page_spinbox.get())
+                end_page = int(self.end_page_spinbox.get())
+
+                if not 1 <= start_page <= self.total_pages:
+                    self._show_validation_message(
+                        f"Start page must be between 1 and {self.total_pages}."
+                    )
+                    return False
+
+                if start_page > end_page:
+                    self._show_validation_message(
+                        "Start page must be less than the end page."
+                    )
+                    return False      
+                  
+                if not start_page <= end_page <= self.total_pages:
+                    self._show_validation_message(
+                        f"End page must be between {start_page} and {self.total_pages}."
+                    )
+                    return False
+                
+                if start_page == end_page:
+                    self._show_validation_message(
+                        "Start page and end page cannot be the same."
+                    )
+                    return False            
+
+        except ValueError:
+            self._show_validation_message("Page values must be whole numbers.")
+            return False
+        
+        self._clear_validation_message()
+        return True
+    
+
+    def _process_pdf(self):
+        if not self._validate_settings():
+            return
+        
+        selected_mode = self.split_mode.get()
+
+        if selected_mode == "split":
+            split_page = int(self.split_page_spinbox.get())
+            print(f"Split after page: {split_page}")
+
+        elif selected_mode == "extract":
+            start_page = int(self.start_page_spinbox.get())
+            end_page = int(self.end_page_spinbox.get())
+            print(f"Extract pages: {start_page} to {end_page}")
+
+        else:
+            print("Split every page")
+    
+
+    def _show_validation_message(self, message, color=Colors.ERROR):
         self.validation_label.config(
             text=message,
             fg=color
         )
 
 
-    def clear_validation_message(self):
+    def _clear_validation_message(self):
         self.validation_label.config(text="")
 
 
     def update_default_status(self):
-        pass
+        if not self.total_pages:
+            self.status_label.config(
+                text="Ready",
+                fg=Colors.TEXT_SECONDARY
+            )
+            return
+
+        page_text = "page" if self.total_pages == 1 else "pages"
+
+        self.status_label.config(
+            text=f"Selected PDF: {self.total_pages} {page_text}",
+            fg=Colors.TEXT_SECONDARY
+        )
