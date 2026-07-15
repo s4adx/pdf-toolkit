@@ -201,7 +201,7 @@ class MergePage(BasePage):
             )
             return
         
-        save_path = select_save_path()
+        save_path = select_save_path("merged.pdf")
 
         if not save_path:
             self.update_status(
@@ -212,8 +212,8 @@ class MergePage(BasePage):
         
 
         success = merge_pdfs(
-            self.selected_files,
-            save_path
+            input_files=self.selected_files,
+            output_path=save_path
         )
 
         if success:

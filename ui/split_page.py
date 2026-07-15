@@ -2,8 +2,9 @@ import tkinter as tk
 from pathlib import Path
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts 
-from utils.file_dialog import select_pdf_file
+from utils.file_dialog import select_pdf_file, create_output_folder, select_save_path
 from utils.helpers import count_pdf_pages
+from backend.split import split_pdf, extract_pages, split_every_page
 
 
 class SplitPage(BasePage):
@@ -342,8 +343,22 @@ class SplitPage(BasePage):
 
 
     def _load_pdf_info(self):
-        self.total_pages = count_pdf_pages(self.selected_file)
+        try:
+            self.total_pages = count_pdf_pages(self.selected_file)
+        
+        except (ValueError, OSError) as error:
+            self.selected_file = None
+            self.total_pages = 0
 
+            self.pdf_name.config(text="No PDF selected")
+            self.split_button.config(state="disabled")
+
+            self._show_validation_message(
+                f"Could not read the selected PDF: {error}"
+            )
+            return
+
+        self._clear_validation_message()
         self._update_spinbox_ranges()
         self.update_default_status()
 
@@ -357,7 +372,18 @@ class SplitPage(BasePage):
         selected_mode = self.split_mode.get()
 
         if selected_mode == "split":
-            self.split_page_spinbox.config(to=self.total_pages)
+            if self.total_pages < 2:
+                self.split_page_spinbox.config(
+                    from_=1,
+                    to=1,
+                    state="disabled"
+                )
+            else:
+                self.split_page_spinbox.config(
+                    from_=1,
+                    to=self.total_pages - 1,
+                    state="normal"
+                )
 
         elif selected_mode == "extract":
             self.start_page_spinbox.config(to=self.total_pages)
@@ -526,7 +552,7 @@ class SplitPage(BasePage):
         try:
             if selected_mode == "split":
                 if self.total_pages < 2:
-                    self.show_validation_message(
+                    self._show_validation_message(
                         "This PDF must have at least 2 pages to be split."
                     )
                     return False
@@ -560,13 +586,7 @@ class SplitPage(BasePage):
                         f"End page must be between {start_page} and {self.total_pages}."
                     )
                     return False
-                
-                if start_page == end_page:
-                    self._show_validation_message(
-                        "Start page and end page cannot be the same."
-                    )
-                    return False            
-
+                          
         except ValueError:
             self._show_validation_message("Page values must be whole numbers.")
             return False
@@ -582,17 +602,121 @@ class SplitPage(BasePage):
         selected_mode = self.split_mode.get()
 
         if selected_mode == "split":
+            output_folder = create_output_folder(default_name=f"{Path(self.selected_file).stem}_split")
+        
+            if not output_folder:
+                self.update_status(
+                    "Operation cancelled",
+                    Colors.ERROR
+                )
+                return
+
             split_page = int(self.split_page_spinbox.get())
-            print(f"Split after page: {split_page}")
+
+            success = split_pdf(
+                input_path=self.selected_file,
+                split_page=split_page,
+                output_folder=output_folder
+            )
+
+            if success:
+                self._clear_selection()
+                
+                self.update_status(
+                    "PDF split successfully.", 
+                    Colors.SUCCESS
+                )
+
+            else:
+                self.update_status(
+                    "Failed to split PDF.", 
+                    Colors.ERROR
+                )
 
         elif selected_mode == "extract":
+            save_path = select_save_path(default_name="extracted.pdf")
+
+            if not save_path:
+                self.update_status(
+                    "Operation cancelled",
+                    Colors.ERROR
+                )
+                return
+            
             start_page = int(self.start_page_spinbox.get())
             end_page = int(self.end_page_spinbox.get())
-            print(f"Extract pages: {start_page} to {end_page}")
+
+            success = extract_pages(
+                input_path=self.selected_file,
+                start_page=start_page,
+                end_page=end_page,
+                output_path=save_path
+            )
+
+            if success:
+                self._clear_selection()
+
+                self.update_status(
+                    "Extracted page range successfully.", 
+                    Colors.SUCCESS
+                )
+
+            else:
+                self.update_status(
+                    "Failed to extract page range.", 
+                    Colors.ERROR
+                )
 
         else:
-            print("Split every page")
+            output_folder = create_output_folder(default_name=f"{Path(self.selected_file).stem}_pages")
+            
+            if not output_folder:
+                self.update_status(
+                    "Operation cancelled",
+                    Colors.ERROR
+                )
+                return
+            
+            success = split_every_page(
+                input_path=self.selected_file,
+                output_folder=output_folder
+            )
+
+            if success:
+                self._clear_selection()
+
+                self.update_status(
+                    "PDF split into separate pages successfully.", 
+                    Colors.SUCCESS
+                )
+
+            else:
+                self.update_status(
+                    "Failed to split PDF into separate pages.", 
+                    Colors.ERROR
+                )
     
+
+    def _clear_selection(self):
+        self.selected_file = None
+        self.total_pages = 0
+
+        self.pdf_name.config(
+            text="No PDF selected",
+            fg=Colors.TEXT_SECONDARY
+        )
+
+        self.split_mode.set("split")
+        self._update_settings_section()
+
+        self.split_button.config(
+            text="Split PDF",
+            state="disabled"
+        )
+
+        self._clear_validation_message()
+        self.update_default_status()
+
 
     def _show_validation_message(self, message, color=Colors.ERROR):
         self.validation_label.config(
