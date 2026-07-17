@@ -10,7 +10,6 @@ class Window:
     ICON = None
 
 
-
 # COLORS
 
 class Colors:
