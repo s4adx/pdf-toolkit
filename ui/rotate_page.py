@@ -7,6 +7,9 @@ class RotatePage(BasePage):
     def __init__(self, parent, page_manager):
         super().__init__(parent, page_manager)
 
+        self.selected_file = None
+        self.total_pages = 0
+
         self.create_header(
             title="Rotate PDF",
             subtitle="Rotate all pages, a single page, or a selected page range."
@@ -15,7 +18,7 @@ class RotatePage(BasePage):
         self._create_content_layout()
         self._create_file_section()
         self._create_rotate_mode_section()
-        self._create_settings_section()
+        self._create_rotation_selection_section()
         self._create_action_section()
 
         self.create_status_bar()
@@ -206,7 +209,7 @@ class RotatePage(BasePage):
                 padx=5,
                 pady=7,
                 cursor="hand2",
-                # command=self._on_mode_change
+                command=self._on_mode_change
             )
 
             radio_button.grid(
@@ -216,47 +219,6 @@ class RotatePage(BasePage):
                 padx=(0 if column == 0 else 4, 0)
             )
 
-
-    def _create_settings_section(self):
-        card = tk.Frame(
-            self.content_frame,
-            bg=Colors.CARD,
-            highlightbackground=Colors.BORDER,
-            highlightthickness=1
-        )
-
-        card.pack(
-            fill="x",
-            pady=(12, 0)
-        )
-
-        self.setting_title = tk.Label(
-            card,
-            text="",
-            bg=Colors.CARD,
-            fg=Colors.TEXT_PRIMARY,
-            font=Fonts.SUBHEADING
-        )
-
-        self.setting_title.pack(
-            anchor="w",
-            padx=15,
-            pady=(14, 5)
-        )
-
-        self.setting_description = tk.Label(
-            card,
-            text="",
-            bg=Colors.CARD,
-            fg=Colors.TEXT_SECONDARY,
-            font=Fonts.SMALL
-        )
-
-        self.setting_description.pack(
-            anchor="w",
-            padx=15
-        )
-
         self.settings_body = tk.Frame(
             card,
             bg=Colors.CARD
@@ -265,7 +227,7 @@ class RotatePage(BasePage):
         self.settings_body.pack(
             fill="x",
             padx=15,
-            pady=(14, 8)
+            pady=(10,8)
         )
 
         self.validation_label = tk.Label(
@@ -280,10 +242,103 @@ class RotatePage(BasePage):
         self.validation_label.pack(
             fill="x",
             padx=15,
-            pady=(0, 12)
+            pady=(0,12)
         )
 
         self._update_settings_section()
+
+
+    def _create_rotation_selection_section(self):
+        card = tk.Frame(
+            self.content_frame,
+            bg=Colors.CARD,
+            highlightbackground=Colors.BORDER,
+            highlightthickness=1
+        )
+
+        card.pack(
+            fill="x",
+            pady=(12, 0)
+        )
+
+        self.setting_title = tk.Label(
+            card,
+            text="Rotation Angle",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_PRIMARY,
+            font=Fonts.SUBHEADING
+        )
+
+        self.setting_title.pack(
+            anchor="w",
+            padx=15,
+            pady=(14, 5)
+        )
+
+        self.setting_description = tk.Label(
+            card,
+            text="Choose how the selected pages should be rotated.",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_SECONDARY,
+            font=Fonts.SMALL
+        )
+
+        self.setting_description.pack(
+            anchor="w",
+            padx=15
+        )
+
+        self.rotation_angle = tk.IntVar(value=90)
+
+        angle_frame = tk.Frame(
+            card,
+            bg=Colors.CARD
+        )
+
+        angle_frame.pack(
+            fill="x",
+            padx=15,
+            pady=(14, 14)
+        )
+
+        options = [
+            ("90° Clockwise", 90),
+            ("180°", 180),
+            ("90° Counterclockwise", -90)
+        ]
+
+        for column, (text, value) in enumerate(options):
+            angle_frame.grid_columnconfigure(
+                column,
+                weight=1,
+                uniform="angles"
+            )
+
+            radio_button = tk.Radiobutton(
+                angle_frame,
+                text=text,
+                variable=self.rotation_angle,
+                value=value,
+                indicatoron=False,
+                bg=Colors.BACKGROUND,
+                fg=Colors.TEXT_PRIMARY,
+                activebackground=Colors.CARD_HOVER,
+                activeforeground=Colors.TEXT_PRIMARY,
+                selectcolor=Colors.PRIMARY,
+                font=Fonts.SMALL,
+                relief="flat",
+                bd=0,
+                padx=5,
+                pady=8,
+                cursor="hand2"
+            )
+
+            radio_button.grid(
+                row=0,
+                column=column,
+                sticky="ew",
+                padx=(0 if column == 0 else 4, 0)
+            )
 
 
     def _create_action_section(self):
@@ -326,16 +381,97 @@ class RotatePage(BasePage):
         self._update_spinbox_ranges()
 
 
+    def _on_mode_change(self):
+        self._clear_validation_message()
+        self._update_settings_section()
+
+
     def _show_all_settings(self):
-        pass
+        message_label = tk.Label(
+            self.settings_body,
+            text="All pages in the PDF will be rotated.",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_SECONDARY,
+            font=Fonts.BODY
+        )
+
+        message_label.pack(anchor="w")
 
 
     def _show_single_settings(self):
-        pass
+        page_label = tk.Label(
+            self.settings_body,
+            text="Page number",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_PRIMARY,
+            font=Fonts.BODY
+        )
+
+        page_label.pack(side="left")
+
+        self.single_page_spinbox = tk.Spinbox(
+            self.settings_body,
+            from_=1,
+            to=100,
+            width=8,
+            justify="center",
+            font=Fonts.BODY
+        )
+
+        self.single_page_spinbox.pack(
+            side="left",
+            padx=(12, 0)
+        )
 
 
     def _show_range_settings(self):
-        pass
+        start_label = tk.Label(
+            self.settings_body,
+            text="Start page",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_PRIMARY,
+            font=Fonts.BODY
+        )
+
+        start_label.pack(side="left")
+
+        self.start_page_spinbox = tk.Spinbox(
+            self.settings_body,
+            from_=1,
+            to=100,
+            width=8,
+            justify="center",
+            font=Fonts.BODY
+        )
+
+        self.start_page_spinbox.pack(
+            side="left",
+            padx=(12, 25)
+        )
+
+        end_label = tk.Label(
+            self.settings_body,
+            text="End page",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_PRIMARY,
+            font=Fonts.BODY
+        )
+
+        end_label.pack(side="left")
+
+        self.end_page_spinbox = tk.Spinbox(
+            self.settings_body,
+            from_=1,
+            to=100,
+            width=8,
+            justify="center",
+            font=Fonts.BODY
+        )
+
+        self.end_page_spinbox.pack(
+            side="left",
+            padx=(12, 0)
+        )
 
     
     def _update_spinbox_ranges(self):
@@ -346,3 +482,5 @@ class RotatePage(BasePage):
         pass
 
     
+    def _clear_validation_message(self):
+        self.validation_label.config(text="")
