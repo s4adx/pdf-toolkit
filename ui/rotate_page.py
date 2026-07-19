@@ -1,6 +1,9 @@
 import tkinter as tk
+from pathlib import Path
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
+from utils.file_dialog import select_pdf_file
+from utils.helpers import count_pdf_pages
 
 class RotatePage(BasePage):
 
@@ -131,7 +134,7 @@ class RotatePage(BasePage):
             row,
             text="Browse",
             width=10,
-            # command=self._select_pdf
+            command=self._select_pdf
         )
 
         self.browse_button.pack(side="right")
@@ -360,30 +363,43 @@ class RotatePage(BasePage):
         )
 
         self.rotate_button.config(state="disabled")
-        self.rotate_button.pack()    
+        self.rotate_button.pack()   
 
-    
-    def _update_settings_section(self):
-        for widget in self.settings_body.winfo_children():
-            widget.destroy()
 
-        selected_mode = self.rotate_mode.get()
+    def _select_pdf(self):
+        file = select_pdf_file()
 
-        if selected_mode == "all":
-            self._show_all_settings()
+        if not file:
+            return
         
-        elif selected_mode == "single":
-            self._show_single_settings()
+        self.selected_file = file
+        self.pdf_name.config(text=Path(file).name)
 
-        else:
-            self._show_range_settings()
-
-        self._update_spinbox_ranges()
+        self._load_pdf_info()
 
 
-    def _on_mode_change(self):
+    def _load_pdf_info(self):
+        try:
+            self.total_pages = count_pdf_pages(self.selected_file)
+
+        except (ValueError, OSError) as error:
+            self.selected_file = None
+            self.total_pages = 0
+
+            self.pdf_name.config(text="No PDF selected")
+            self.rotate_button.config(state="disabled")
+
+            self._show_validation_message(
+                f"Could not read the selected PDF: {error}"
+            )
+
+            return
+        
         self._clear_validation_message()
-        self._update_settings_section()
+        self._update_spinbox_ranges()
+        self.update_default_status()
+
+        self.rotate_button.config(state="normal")
 
 
     def _show_all_settings(self):
@@ -473,14 +489,83 @@ class RotatePage(BasePage):
             padx=(12, 0)
         )
 
+
+    def _update_settings_section(self):
+        for widget in self.settings_body.winfo_children():
+            widget.destroy()
+
+        selected_mode = self.rotate_mode.get()
+
+        if selected_mode == "all":
+            self._show_all_settings()
+        
+        elif selected_mode == "single":
+            self._show_single_settings()
+
+        else:
+            self._show_range_settings()
+
+        self._update_spinbox_ranges()
+
+
+    def _on_mode_change(self):
+        self._clear_validation_message()
+        self._update_settings_section()
     
+
     def _update_spinbox_ranges(self):
-        pass
+        if not self.total_pages:
+            return
+        
+        selected_mode = self.rotate_mode.get()
+
+        if selected_mode == "single":
+            if self.total_pages < 2:
+                self.single_page_spinbox.config(
+                    from_=1,
+                    to=1
+                )
+
+            else:
+                self.single_page_spinbox.config(
+                    from_=1,
+                    to=self.total_pages
+                )
+
+        elif selected_mode == "range":
+            self.start_page_spinbox.config(to=self.total_pages)
+            self.end_page_spinbox.config(to=self.total_pages)
+
+            self.end_page_spinbox.delete(0, tk.END)
+            self.end_page_spinbox.insert(0, str(self.total_pages))
 
 
     def _process_pdf(self):
         pass
 
     
+    def _show_validation_message(self, message, color=Colors.ERROR):
+        self.validation_label.config(
+            text=message,
+            fg=color
+        )
+
+
     def _clear_validation_message(self):
         self.validation_label.config(text="")
+
+    
+    def update_default_status(self):
+        if not self.total_pages:
+            self.status_label.config(
+                text="Ready",
+                fg=Colors.TEXT_SECONDARY
+            )
+            return
+
+        page_text = "page" if self.total_pages == 1 else "pages"
+
+        self.status_label.config(
+            text=f"Selected PDF: {self.total_pages} {page_text}",
+            fg=Colors.TEXT_SECONDARY
+        )
