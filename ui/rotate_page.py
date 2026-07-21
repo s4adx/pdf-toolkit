@@ -539,6 +539,64 @@ class RotatePage(BasePage):
             self.end_page_spinbox.delete(0, tk.END)
             self.end_page_spinbox.insert(0, str(self.total_pages))
 
+    
+    def _validate_settings(self):
+        if not self.selected_file:
+            self._show_validation_message(
+                "Please select a PDF file"
+            )
+            return False
+    
+        selected_mode = self.rotate_mode.get()
+
+        try:
+            if selected_mode == "single":
+                page_number = int(
+                    self.single_page_spinbox.get()
+                )
+
+                if not 1 <= page_number <= self.total_pages:
+                    self._show_validation_message(
+                        f"Page number must be between 1 and {self.total_pages}."
+                    )
+                    return False
+
+            elif selected_mode == "range":
+                start_page = int(
+                    self.start_page_spinbox.get()
+                )
+
+                end_page = int(
+                    self.end_page_spinbox.get()
+                )
+
+                if not 1 <= start_page <= self.total_pages:
+                    self._show_validation_message(
+                        f"Start page must be between 1 and {self.total_pages}."
+                    )
+                    return False
+
+                if not 1 <= end_page <= self.total_pages:
+                    self._show_validation_message(
+                        f"End page must be between 1 and {self.total_pages}."
+                    )
+                    return False
+
+                if start_page > end_page:
+                    self._show_validation_message(
+                        "Start page cannot be greater than end page."
+                    )
+                    return False
+
+        except ValueError:
+            self._show_validation_message(
+                "Page values must be whole numbers."
+            )
+            return False
+
+        self._clear_validation_message()
+        return True
+
 
     def _process_pdf(self):
         pass
