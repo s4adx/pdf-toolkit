@@ -323,7 +323,8 @@ class SplitPage(BasePage):
             action_frame,
             text="Split PDF",
             width=20,
-            command=self._process_pdf
+            command=self._process_pdf,
+            cursor="hand2"
         )
 
         self.split_button.config(state="disabled")

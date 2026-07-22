@@ -146,7 +146,8 @@ class MergePage(BasePage):
             action_frame,
             text="Merge PDFs",
             width=20,
-            command=self._merge_pdfs
+            command=self._merge_pdfs,
+            cursor="hand2"
         )
         self.merge_button.config(state="disabled")
         self.merge_button.pack()

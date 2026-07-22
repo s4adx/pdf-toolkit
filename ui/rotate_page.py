@@ -4,6 +4,7 @@ from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
 from utils.file_dialog import select_pdf_file, select_save_path
 from utils.helpers import count_pdf_pages
+from backend.rotate import rotate_pdf
 
 class RotatePage(BasePage):
 
@@ -280,7 +281,7 @@ class RotatePage(BasePage):
 
         self.setting_description = tk.Label(
             card,
-            text="Choose how the selected pages should be rotated.",
+            text="Choose the direction in which the selected pages should turn.",
             bg=Colors.CARD,
             fg=Colors.TEXT_SECONDARY,
             font=Fonts.SMALL
@@ -305,9 +306,9 @@ class RotatePage(BasePage):
         )
 
         options = [
-            ("90° Clockwise", 90),
-            ("180°", 180),
-            ("90° Counterclockwise", -90)
+            ("↻ Rotate Right 90°", 90),
+            ("↕ Flip 180°", 180),
+            ("↺ Rotate Left 90°", -90)
         ]
 
         for column, (text, value) in enumerate(options):
@@ -359,7 +360,8 @@ class RotatePage(BasePage):
             action_frame,
             text="Rotate PDF",
             width=20,
-            command=self._process_pdf
+            command=self._process_pdf,
+            cursor="hand2"
         )
 
         self.rotate_button.config(state="disabled")
@@ -520,17 +522,10 @@ class RotatePage(BasePage):
         selected_mode = self.rotate_mode.get()
 
         if selected_mode == "single":
-            if self.total_pages < 2:
-                self.single_page_spinbox.config(
-                    from_=1,
-                    to=1
-                )
-
-            else:
-                self.single_page_spinbox.config(
-                    from_=1,
-                    to=self.total_pages
-                )
+            self.single_page_spinbox.config(
+                from_=1,
+                to=self.total_pages
+            )
 
         elif selected_mode == "range":
             self.start_page_spinbox.config(to=self.total_pages)
@@ -543,7 +538,7 @@ class RotatePage(BasePage):
     def _validate_settings(self):
         if not self.selected_file:
             self._show_validation_message(
-                "Please select a PDF file"
+                "Please select a PDF file."
             )
             return False
     
@@ -588,27 +583,95 @@ class RotatePage(BasePage):
             return False
 
         self._clear_validation_message()
+
         return True
 
 
     def _process_pdf(self):
-        if not self._validate_settings:
+        if not self._validate_settings():
             return
         
-        selected_mode = self.rotate_button.get()
+        selected_mode = self.rotate_mode.get()
+        
+        output_path = select_save_path(default_name=f"{Path(self.selected_file).stem}_rotated.pdf")
 
-        if selected_mode == "all":
-            output_path = select_save_path(default_name=Path(self.selected_file).stem)
+        if not output_path:
+            self.update_status(
+                "Operation cancelled",
+                Colors.ERROR
+            )
+            return
 
-            if not output_path:
-                self.update_status(
-                    "Operation cancelled",
-                    Colors.ERROR
-                )
-                return
+        angle = self.rotation_angle.get()
+
+        if selected_mode == "range":
+            start_page = int(self.start_page_spinbox.get())
+            end_page = int(self.end_page_spinbox.get())
+
+            success = rotate_pdf(
+                input_path=self.selected_file,
+                output_path=output_path,
+                rotation_angle=angle,
+                page_mode="range",
+                start_page=start_page,
+                end_page=end_page
+            )
+
+        elif selected_mode == "single":
+            single_page = int(self.single_page_spinbox.get())
+
+            success = rotate_pdf(
+                input_path=self.selected_file,
+                output_path=output_path,
+                rotation_angle=angle,
+                page_mode="single",
+                start_page=single_page
+            )
+
+        else:
+            success = rotate_pdf(
+                input_path=self.selected_file,
+                output_path=output_path,
+                rotation_angle=angle,
+                page_mode="all"
+            )
+
+        self._display_result(success)
+
+
+    def _display_result(self, success):
+        if success:
+            self._clear_selection()
             
-            
+            self.update_status(
+                "PDF rotated successfully.", 
+                Colors.SUCCESS
+            )
 
+        else:
+            self.update_status(
+                "Failed to rotate PDF.", 
+                Colors.ERROR
+            )
+
+
+    def _clear_selection(self):
+        self.selected_file = None
+        self.total_pages = 0
+
+        self.pdf_name.config(
+            text="No PDF selected",
+            fg=Colors.TEXT_SECONDARY
+        )
+
+        self.rotate_mode.set("all")
+        self.rotation_angle.set(value=90)
+        self._update_settings_section()
+
+        self.rotate_button.config(state="disabled")
+
+        self._clear_validation_message()
+        self.update_default_status()
 
     
     def _show_validation_message(self, message, color=Colors.ERROR):
