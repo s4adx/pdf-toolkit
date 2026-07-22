@@ -2,7 +2,7 @@ import tkinter as tk
 from pathlib import Path
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
-from utils.file_dialog import select_pdf_file
+from utils.file_dialog import select_pdf_file, select_save_path
 from utils.helpers import count_pdf_pages
 
 class RotatePage(BasePage):
@@ -551,9 +551,7 @@ class RotatePage(BasePage):
 
         try:
             if selected_mode == "single":
-                page_number = int(
-                    self.single_page_spinbox.get()
-                )
+                page_number = int(self.single_page_spinbox.get())
 
                 if not 1 <= page_number <= self.total_pages:
                     self._show_validation_message(
@@ -562,13 +560,8 @@ class RotatePage(BasePage):
                     return False
 
             elif selected_mode == "range":
-                start_page = int(
-                    self.start_page_spinbox.get()
-                )
-
-                end_page = int(
-                    self.end_page_spinbox.get()
-                )
+                start_page = int(self.start_page_spinbox.get())
+                end_page = int(self.end_page_spinbox.get())
 
                 if not 1 <= start_page <= self.total_pages:
                     self._show_validation_message(
@@ -599,7 +592,23 @@ class RotatePage(BasePage):
 
 
     def _process_pdf(self):
-        pass
+        if not self._validate_settings:
+            return
+        
+        selected_mode = self.rotate_button.get()
+
+        if selected_mode == "all":
+            output_path = select_save_path(default_name=Path(self.selected_file).stem)
+
+            if not output_path:
+                self.update_status(
+                    "Operation cancelled",
+                    Colors.ERROR
+                )
+                return
+            
+            
+
 
     
     def _show_validation_message(self, message, color=Colors.ERROR):
