@@ -375,28 +375,162 @@ class DeletePage(BasePage):
         self.delete_button.config(state="normal")
 
 
-    def _on_mode_change(self):
-        pass
-
-
     def _update_settings_section(self):
-        pass
+        for widget in self.settings_body.winfo_children():
+            widget.destroy()
+
+        selected_mode = self.delete_mode.get()
+
+        if selected_mode == "single":
+            self._show_single_settings()
+
+        elif selected_mode == "range":
+            self._show_range_settings()
+
+        elif selected_mode == "specific":
+            self._show_specific_settings()
+
+        self._update_spinbox_ranges()
+
+
+    def _on_mode_change(self):
+        self._clear_validation_message()
+        self._update_settings_section()
 
 
     def _update_spinbox_ranges(self):
-        pass
+        if not self.total_pages:
+            return
+        
+        # selected_mode = self.delete_mode.get()
+
+        # if selected_mode == "single":
+        #     self.single_page_spinbox.config(
+        #         from_=1,
+        #         to=self.total_pages
+        #     )
+
+        # elif selected_mode == "range":
+        #     self.start_page_spinbox.config(to=self.total_pages)
+        #     self.end_page_spinbox.config(to=self.total_pages)
+
+        #     self.end_page_spinbox.delete(0, tk.END)
+        #     self.end_page_spinbox.insert(0, str(self.total_pages))
 
 
     def _show_single_settings(self):
-        pass
+        self.setting_title.config(text="Delete a Single Page")
+        self.setting_description.config(text="Enter the page number to remove.")
+
+        page_label = tk.Label(
+            self.settings_body,
+            text="Page number",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_PRIMARY,
+            font=Fonts.BODY
+        )
+
+        page_label.pack(side="left")
+
+        self.single_page_spinbox = tk.Spinbox(
+            self.settings_body,
+            from_=1,
+            to=100,
+            width=8,
+            justify="center",
+            font=Fonts.BODY
+        )
+
+        self.single_page_spinbox.pack(side="left", padx=(12,0))
 
 
     def _show_range_settings(self):
-        pass
+        self.setting_title.config(text="Delete a Page Range")
+        self.setting_description.config(text="Enter the starting and ending pages to remove.")
+    
+        start_label = tk.Label(
+            self.settings_body,
+            text="Start page",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_PRIMARY,
+            font=Fonts.BODY
+        )
+        
+        start_label.pack(side="left")
+        
+        self.start_page_spinbox = tk.Spinbox(
+            self.settings_body,
+            from_=1,
+            to=100,
+            width=8,
+            justify="center",
+            font=Fonts.BODY
+        )
+        
+        self.start_page_spinbox.pack(
+            side="left",
+            padx=(12, 25)
+        )
+        
+        end_label = tk.Label(
+            self.settings_body,
+            text="End page",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_PRIMARY,
+            font=Fonts.BODY
+        )
+        
+        end_label.pack(side="left")
+        
+        self.end_page_spinbox = tk.Spinbox(
+            self.settings_body,
+            from_=1,
+            to=100,
+            width=8,
+            justify="center",
+            font=Fonts.BODY
+        )
+        
+        self.end_page_spinbox.pack(
+            side="left",
+            padx=(12,0)
+        )
 
 
     def _show_specific_settings(self):
-        pass
+        self.setting_title.config(text="Delete Specific Pages")
+        self.setting_description.config(text="Enter page numbers separated by commas.")
+
+        page_label = tk.Label(
+        self.settings_body,
+        text="Page numbers",
+        bg=Colors.CARD,
+        fg=Colors.TEXT_PRIMARY,
+        font=Fonts.BODY
+        )
+
+        page_label.pack(side="left")
+
+        self.specific_pages_entry = tk.Entry(
+            self.settings_body,
+            width=28,
+            font=Fonts.BODY
+        )
+
+        self.specific_pages_entry.pack(
+            side="left",
+            padx=(12, 12)
+        )
+
+        example_label = tk.Label(
+            self.settings_body,
+            text="Example: 1, 4, 7",
+            bg=Colors.CARD,
+            fg=Colors.TEXT_SECONDARY,
+            font=Fonts.SMALL
+        )
+
+        example_label.pack(side="left")
 
 
     def _validate_settings(self):
@@ -416,11 +550,14 @@ class DeletePage(BasePage):
 
 
     def _show_validation_message(self, message, color=Colors.ERROR):
-        pass
+        self.validation_label.config(
+            text=message,
+            fg=color
+        )
 
 
     def _clear_validation_message(self):
-        pass
+        self.validation_label.config(text="")
 
 
     def update_default_status(self):
