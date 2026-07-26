@@ -534,7 +534,105 @@ class DeletePage(BasePage):
 
 
     def _validate_settings(self):
-        pass
+        if not self.selected_file:
+            self._show_validation_message("Please select a PDF file.")
+            return False
+        
+        selected_mode = self.rotate_mode.get()
+
+        try:    
+            if selected_mode == "single":
+                page_number = int(self.single_page_spinbox.get())
+
+                if not 1 <= page_number <= self.total_pages:
+                    self._show_validation_message(
+                        f"Page number must be between 1 and {self.total_pages}."
+                    )
+                    return False
+
+                if self.total_pages == 1:
+                    self._show_validation_message(
+                        "At least one page must remain in th PDF."
+                    )
+                    return False
+
+            elif selected_mode == "range":
+                start_page = int(
+                    self.start_page_spinbox.get()
+                )
+
+                end_page = int(
+                    self.end_page_spinbox.get()
+                )
+
+                if not 1 <= start_page <= self.total_pages:
+                    self._show_validation_message(
+                        f"Start page must be between 1 and {self.total_pages}."
+                    )
+                    return False
+
+                if not 1 <= end_page <= self.total_pages:
+                    self._show_validation_message(
+                        f"End page must be between 1 and {self.total_pages}."
+                    )
+                    return False
+
+                if start_page > end_page:
+                    self._show_validation_message(
+                        "Start page cannot be greater than end page."
+                    )
+                    return False
+
+                if start_page == 1 and end_page == self.total_pages:
+                    self._show_validation_message(
+                        "At least one page must remain in the PDF."
+                    )
+                    return False
+
+            elif selected_mode == "specific":
+                pages_text = self.specific_pages_entry.get().strip()
+
+                if not pages_text:
+                    self._show_validation_message(
+                        "Enter at least one page number."
+                    )
+                    return False
+
+                page_values = pages_text.split(",")
+
+                if any(not value.strip() for value in page_values):
+                    self._show_validation_message(
+                        "Page numbers must be separated correctly by commas."
+                    )
+                    return False
+
+                pages = [
+                    int(value.strip())
+                    for value in page_values
+                ]
+
+                if any(
+                    page < 1 or page > self.total_pages
+                    for page in pages
+                ):
+                    self._show_validation_message(
+                        f"Page numbers must be between 1 and {self.total_pages}."
+                    )
+                    return False
+
+                unique_pages = set(pages)
+
+                if len(unique_pages) >= self.total_pages:
+                    self._show_validation_message(
+                        "At least one page must remain in the PDF."
+                    )
+                    return False
+            
+        except ValueError:
+            self._show_validation_message(
+                "Page values must be whole numbers."
+            )
+            return False 
 
 
     def _process_pdf(self):
