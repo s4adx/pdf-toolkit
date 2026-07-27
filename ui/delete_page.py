@@ -3,7 +3,7 @@ from pathlib import Path
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
 from utils.helpers import count_pdf_pages
-from utils.file_dialog import select_pdf_file
+from utils.file_dialog import select_pdf_file, select_save_path
 
 class DeletePage(BasePage):
 
@@ -402,20 +402,20 @@ class DeletePage(BasePage):
         if not self.total_pages:
             return
         
-        # selected_mode = self.delete_mode.get()
+        selected_mode = self.delete_mode.get()
 
-        # if selected_mode == "single":
-        #     self.single_page_spinbox.config(
-        #         from_=1,
-        #         to=self.total_pages
-        #     )
+        if selected_mode == "single":
+            self.single_page_spinbox.config(
+                from_=1,
+                to=self.total_pages
+            )
 
-        # elif selected_mode == "range":
-        #     self.start_page_spinbox.config(to=self.total_pages)
-        #     self.end_page_spinbox.config(to=self.total_pages)
+        elif selected_mode == "range":
+            self.start_page_spinbox.config(to=self.total_pages)
+            self.end_page_spinbox.config(to=self.total_pages)
 
-        #     self.end_page_spinbox.delete(0, tk.END)
-        #     self.end_page_spinbox.insert(0, str(self.total_pages))
+            self.end_page_spinbox.delete(0, tk.END)
+            self.end_page_spinbox.insert(0, str(self.total_pages))
 
 
     def _show_single_settings(self):
@@ -636,7 +636,23 @@ class DeletePage(BasePage):
 
 
     def _process_pdf(self):
-        pass
+        if not self._validate_settings():
+            return
+
+        selected_mode = self.delete_mode.get()
+
+        output_path = select_save_path(default_name=f"{Path(self.selected_file).stem}_deleted.pdf")
+
+        if not output_path:
+            self.update_status(
+                "Operation cancelled",
+                Colors.ERROR
+            )
+            return
+
+        if selected_mode == "single":
+            pass
+        
 
 
     def _display_result(self, success):
