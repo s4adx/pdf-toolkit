@@ -4,6 +4,7 @@ from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
 from utils.helpers import count_pdf_pages
 from utils.file_dialog import select_pdf_file, select_save_path
+from backend.delete import delete_pages
 
 class DeletePage(BasePage):
 
@@ -15,7 +16,7 @@ class DeletePage(BasePage):
         
         self.create_header(
             title="Delete Pages",
-            subtitle="Remove a single page, a page range, or multiple selected pages from your PDF."
+            subtitle="Remove a single page, a page range, or specific pages from a PDF."
         )
 
         self._create_content_layout()
@@ -92,7 +93,7 @@ class DeletePage(BasePage):
 
         description = tk.Label(
             card,
-            text="Choose the PDF from which you want to delete pages.",
+            text="Choose a PDF from which pages should be removed.",
             bg=Colors.CARD,
             fg=Colors.TEXT_SECONDARY,
             font=Fonts.SMALL
@@ -538,7 +539,7 @@ class DeletePage(BasePage):
             self._show_validation_message("Please select a PDF file.")
             return False
         
-        selected_mode = self.rotate_mode.get()
+        selected_mode = self.delete_mode.get()
 
         try:    
             if selected_mode == "single":
@@ -552,7 +553,7 @@ class DeletePage(BasePage):
 
                 if self.total_pages == 1:
                     self._show_validation_message(
-                        "At least one page must remain in th PDF."
+                        "At least one page must remain in the PDF."
                     )
                     return False
 
@@ -627,6 +628,8 @@ class DeletePage(BasePage):
                         "At least one page must remain in the PDF."
                     )
                     return False
+
+            return True
             
         except ValueError:
             self._show_validation_message(
@@ -641,6 +644,8 @@ class DeletePage(BasePage):
 
         selected_mode = self.delete_mode.get()
 
+        self._clear_validation_message()
+
         output_path = select_save_path(default_name=f"{Path(self.selected_file).stem}_deleted.pdf")
 
         if not output_path:
@@ -650,17 +655,83 @@ class DeletePage(BasePage):
             )
             return
 
+
         if selected_mode == "single":
-            pass
-        
+            single_page = int(self.single_page_spinbox.get())
+
+            page_to_delete = {single_page}
+
+            success = delete_pages(
+                input_path=self.selected_file,
+                output_path=output_path,
+                pages_to_delete=page_to_delete
+            )
+
+        elif selected_mode == "range":
+            start_page = int(self.start_page_spinbox.get())
+            end_page = int(self.end_page_spinbox.get())
+
+            pages_to_delete = set(range(start_page, end_page+1))
+
+            success = delete_pages(
+                input_path=self.selected_file,
+                output_path=output_path,
+                pages_to_delete=pages_to_delete
+            )
+
+        elif selected_mode == "specific":
+            pages_text = self.specific_pages_entry.get().strip()
+            page_values = pages_text.split(",")
+
+            pages = [
+                int(value.strip())
+                for value in page_values
+            ]
+
+            unique_pages = set(pages)
+
+            success = delete_pages(
+                input_path=self.selected_file,
+                output_path=output_path,
+                pages_to_delete=unique_pages
+            )
+
+        self._display_result(success)
 
 
     def _display_result(self, success):
-        pass
+        if success:
+            self._clear_selection()
+            
+            self.update_status(
+                "Pages deleted successfully.", 
+                Colors.SUCCESS
+            )
+
+        else:
+            self.update_status(
+                "Failed to delete pages from PDF.", 
+                Colors.ERROR
+            )
 
 
     def _clear_selection(self):
-        pass
+        self.selected_file = None
+        self.total_pages = 0
+
+        self.pdf_name.config(
+            text="No PDF selected",
+            fg=Colors.TEXT_SECONDARY
+        )
+
+        self.delete_mode.set("single")
+        self._update_settings_section()
+
+        self.delete_button.config(state="disabled")
+
+        self._clear_validation_message()
+        self.update_default_status()
+
 
 
     def _show_validation_message(self, message, color=Colors.ERROR):
