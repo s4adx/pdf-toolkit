@@ -15,7 +15,7 @@ def merge_pdfs(input_files, output_path):
         return True
 
     except Exception as e:
-        print(e)    # Print error in terminal for easier debugigng
+        print(e)    # Print error in terminal for easier debugging
         return False
     
     finally:

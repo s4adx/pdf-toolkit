@@ -33,7 +33,7 @@ def split_pdf(input_path, split_page, output_folder):
         return True
 
     except Exception as e:
-        print(e)    # Print error in terminal for easier debugigng
+        print(e)    # Print error in terminal for easier debugging
         return False
 
     finally:

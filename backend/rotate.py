@@ -31,7 +31,7 @@ def rotate_pdf(input_path, output_path, rotation_angle, page_mode, start_page=No
         return True
 
     except Exception as e:
-        print(e)    # Print error in terminal for easier debugigng
+        print(e)    # Print error in terminal for easier debugging
         return False
     
     finally:
