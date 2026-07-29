@@ -3,8 +3,9 @@ from pathlib import Path
 
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
-from utils.file_dialog import select_pdf_file
+from utils.file_dialog import select_pdf_file, select_save_path
 from utils.helpers import count_pdf_pages
+from backend.protect import protect_pdf
 
 
 class ProtectPage(BasePage):
@@ -328,31 +329,137 @@ class ProtectPage(BasePage):
 
 
     def _select_pdf(self):
-        pass
+        file = select_pdf_file()
+
+        if not file:
+            return
+        
+        self.selected_file = file
+        self.pdf_name.config(text=Path(file).name)
+
+        self._load_pdf_info()
 
 
     def _load_pdf_info(self):
-        pass
+        try:
+            self.total_pages = count_pdf_pages(self.selected_file)
+        
+        except (ValueError, OSError) as error:
+            self.selected_file = None
+            self.total_pages = 0
+        
+            self.pdf_name.config(text="No PDF selected")
+            self.protect_button.config(state="disabled")
+        
+            self._show_validation_message(
+                f"Could not read the selected PDF: {error}"
+            )
+        
+            return
+        
+        self._clear_validation_message()
+        self.update_default_status()
+        
+        self.protect_button.config(state="normal")
 
 
     def _toggle_password_visibility(self):
-        pass
+        if self.show_password.get():
+            show_character = ""
+        else:
+            show_character = "•"
+
+        self.password_entry.config(show=show_character)
+        self.confirm_password_entry.config(show=show_character)
+        
 
 
     def _validate_settings(self):
-        pass
+        if not self.selected_file:
+            self._show_validation_message("Please select a PDF file.")
+            return False
+
+        password = self.password_entry.get().strip()
+        confirm_password = self.confirm_password_entry.get().strip()
+
+        if not password:
+            self._show_validation_message("Enter a password.")
+            return False
+
+        if not confirm_password:
+            self._show_validation_message("Confirm the password.")
+            return False
+
+        if len(password) < 4:
+            self._show_validation_message("Password must contain at least 4 characters.")
+            return False
+
+        if password != confirm_password:
+            self._show_validation_message("Passwords do not match.")
+            return False
+
+        self._clear_validation_message()
+        return True
 
 
     def _process_pdf(self):
-        pass
+        if not self._validate_settings():
+            return
+
+        output_path = select_save_path(default_name=f"{Path(self.selected_file).stem}_protected.pdf")
+
+        if not output_path:
+            self.update_status(
+                "Operation cancelled",
+                Colors.ERROR
+            )
+            return
+
+        password = self.password_entry.get().strip()
+
+        success = protect_pdf(
+            input_path=self.selected_file,
+            output_path=output_path,
+            password=password
+        )
+
+        self._display_result(success)
 
 
     def _display_result(self, success):
-        pass
+        if success:
+            self._clear_selection()
+            
+            self.update_status(
+                "PDF protected successfully.", 
+                Colors.SUCCESS
+            )
+
+        else:
+            self.update_status(
+                "Failed to protect PDF.", 
+                Colors.ERROR
+            )
 
 
     def _clear_selection(self):
-        pass
+        self.selected_file = None
+        self.total_pages = 0
+
+        self.pdf_name.config(
+            text="No PDF selected",
+            fg=Colors.TEXT_SECONDARY
+        )
+
+        self.show_password.set(value=False)
+        self._toggle_password_visibility()
+        self.protect_button.config(state="disabled")
+
+        self.password_entry.delete(0, tk.END)
+        self.confirm_password_entry.delete(0, tk.END)
+
+        self._clear_validation_message()
+        self.update_default_status()
 
 
     def _show_validation_message(self, message, color=Colors.ERROR):
