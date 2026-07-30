@@ -6,8 +6,11 @@ class ImagesToPdfPage(BasePage):
 
     def __init__(self, parent, page_manager):
         super().__init__(parent, page_manager)
-        self._create_widgets()
+        
+        self.selected_file = None
+        self.total_pages = 0
 
-
-    def _create_widgets(self):
-        pass
+        self.create_header(
+            title="Rotate PDF",
+            subtitle="Rotate all pages, a single page, or a selected page range."
+        )
