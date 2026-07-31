@@ -11,6 +11,6 @@ class ImagesToPdfPage(BasePage):
         self.total_pages = 0
 
         self.create_header(
-            title="Rotate PDF",
-            subtitle="Rotate all pages, a single page, or a selected page range."
+            title="Images to PDF",
+            subtitle="Combine multiple images into a single PDF in the preferred order."
         )
