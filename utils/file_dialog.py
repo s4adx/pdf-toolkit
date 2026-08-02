@@ -74,6 +74,20 @@ def create_output_folder(default_name="output"):
         )
         return 
 
+def select_image_files():
+    downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
+    file_path = filedialog.askopenfilenames(
+        initialdir=downloads_folder,
+        title="Select Multiple Image Files",
+        filetypes=[
+                ("Image files", "*.jpg *.jpeg *.png *.bmp *.webp"),
+                ("All files", "*.*")
+        ]
+    )
+
+    if file_path:
+        return file_path
+    
 
 def save_pdf():
     pass

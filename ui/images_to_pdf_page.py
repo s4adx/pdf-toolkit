@@ -1,7 +1,7 @@
 import tkinter as tk
-
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
+from utils.file_dialog import select_image_files
 
 
 class ImagesToPdfPage(BasePage):
@@ -425,8 +425,21 @@ class ImagesToPdfPage(BasePage):
 
 
     def _add_images(self):
-        pass
+        files = select_image_files()
 
+        if not files:
+            return
+
+        for file in files:
+            if file not in self.selected_images:
+                self.selected_images.append(file)
+
+        self._clear_validation_message()
+        self._refresh_images_list()
+
+        self.create_pdf_button.config(
+            state="normal"
+        )
 
     def _remove_selected(self):
         pass
@@ -497,11 +510,7 @@ class ImagesToPdfPage(BasePage):
             )
             return
 
-        image_text = (
-            "image"
-            if image_count == 1
-            else "images"
-        )
+        image_text = ("image" if image_count == 1 else "images")
 
         self.status_label.config(
             text=f"Selected: {image_count} {image_text}",
