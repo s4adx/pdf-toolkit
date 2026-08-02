@@ -1,4 +1,5 @@
 import tkinter as tk
+from pathlib import Path
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
 from utils.file_dialog import select_image_files
@@ -437,16 +438,28 @@ class ImagesToPdfPage(BasePage):
         self._clear_validation_message()
         self._refresh_images_list()
 
-        self.create_pdf_button.config(
-            state="normal"
-        )
+        self.create_pdf_button.config(state="normal")
+
 
     def _remove_selected(self):
-        pass
+        selection = self.images_listbox.curselection()
+
+        if not selection:
+            return
+
+        index = selection[0]
+
+        if index >= len(self.selected_images):
+            return
+
+        self.selected_images.pop(index) 
+        self._refresh_images_list()
 
 
     def _clear_images(self):
-        pass
+        self.selected_images.clear()
+
+        self._refresh_images_list()
 
 
     def _move_up(self):
@@ -458,7 +471,19 @@ class ImagesToPdfPage(BasePage):
 
 
     def _refresh_images_list(self):
-        pass
+        self.images_listbox.delete(0, tk.END)
+        
+        for file in self.selected_images:
+            self.images_listbox.insert(tk.END, Path(file).name)
+        
+        if not self.selected_images:
+            self.images_listbox.insert(tk.END, "No Image Selected.")
+            self.create_pdf_button.config(state="disabled")
+
+        else:
+            self.create_pdf_button.config(state="normal")
+
+        self.update_default_status()
 
 
     def _validate_settings(self):
