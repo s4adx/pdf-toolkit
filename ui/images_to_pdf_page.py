@@ -499,7 +499,8 @@ class ImagesToPdfPage(BasePage):
 
 
     def _clear_selection(self):
-        pass
+        self.selected_files.clear()
+        self._refresh_images_list()
 
 
     def _show_validation_message(
