@@ -463,11 +463,52 @@ class ImagesToPdfPage(BasePage):
 
 
     def _move_up(self):
-        pass
+        selection = self.images_listbox.curselection()
+        
+        if not selection:
+            return
+
+        index = selection[0]
+
+        if index <= 0 or index >= len(self.selected_images):
+            return
+
+        self._swap_items(index, index - 1)
+
+        self._refresh_images_list()
+        self._refocus_listbox(index - 1)
 
 
     def _move_down(self):
-        pass
+        selection = self.images_listbox.curselection()
+        
+        if not selection:
+            return
+
+        index = selection[0]
+
+        if index < 0 or index >= len(self.selected_images) - 1:
+            return
+
+        self._swap_items(index, index + 1)
+
+        self._refresh_images_list()
+        self._refocus_listbox(index + 1)
+
+
+    def _swap_items(self, a, b):
+        self.selected_images[a], self.selected_images[b] = (
+            self.selected_images[b],
+            self.selected_images[a]
+        )
+
+
+    def _refocus_listbox(self, new_index):
+        self.images_listbox.selection_clear(0, tk.END)
+        self.images_listbox.selection_set(new_index)
+        self.images_listbox.activate(new_index)
+        self.images_listbox.see(new_index)
+        self.images_listbox.focus_set()
 
 
     def _refresh_images_list(self):
