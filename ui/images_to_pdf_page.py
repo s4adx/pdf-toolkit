@@ -528,8 +528,46 @@ class ImagesToPdfPage(BasePage):
 
 
     def _validate_settings(self):
-        pass
+        self._clear_validation_message()
 
+        if not self.selected_images:
+            self._show_validation_message(
+                "Add at least one image before creating the PDF."
+            )
+            return False
+
+        for image_path in self.selected_images:
+            if not Path(image_path).is_file():
+                self._show_validation_message(
+                    f"Image file not found: {Path(image_path).name}"
+                )
+            return False
+
+        valid_page_sizes = {
+            "image",
+            "a4"
+        }
+
+        if self.page_size.get() not in valid_page_sizes:
+            self._show_validation_message(
+                "Select a valid page size."
+            )
+            return False
+
+        valid_orientations = {
+            "auto",
+            "portrait",
+            "landscape"
+        }
+
+        if self.orientation.get() not in valid_orientations:
+            self._show_validation_message(
+                "Select a valid page orientation."
+            )
+            return False
+
+        return True
+        
 
     def _process_images(self):
         pass
