@@ -2,8 +2,8 @@ import tkinter as tk
 from pathlib import Path
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
-from utils.file_dialog import select_image_files
-
+from utils.file_dialog import select_image_files, select_save_path
+from backend.images_to_pdf import images_to_pdf
 
 class ImagesToPdfPage(BasePage):
 
@@ -570,11 +570,45 @@ class ImagesToPdfPage(BasePage):
         
 
     def _process_images(self):
-        pass
+        if not self._validate_settings():
+            return
+
+        print("hello")
+
+        output_path = select_save_path(default_name=f"{Path(self.selected_images).stem}_img_to_pdf.pdf")
+
+        if not output_path:
+            self.update_status(
+                "Operation cancelled",
+                Colors.ERROR
+            )
+            return
+
+        success = images_to_pdf(
+            input_path=self.selected_images,
+            output_path=output_path,
+            page_size=self.page_size,
+            orientation=self.orientation
+        )
+
+        self._display_result(success)
 
 
     def _display_result(self, success):
-        pass
+        if success:
+            self._clear_selection()
+            
+            self.update_status(
+                "Images converted to PDF successfully.", 
+                Colors.SUCCESS
+            )
+
+        else:
+            self.update_status(
+                "Failed to convert images to PDF.", 
+                Colors.ERROR
+            )
+
 
 
     def _clear_selection(self):
