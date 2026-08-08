@@ -541,7 +541,7 @@ class ImagesToPdfPage(BasePage):
                 self._show_validation_message(
                     f"Image file not found: {Path(image_path).name}"
                 )
-            return False
+                return False
 
         valid_page_sizes = {
             "image",
@@ -573,9 +573,7 @@ class ImagesToPdfPage(BasePage):
         if not self._validate_settings():
             return
 
-        print("hello")
-
-        output_path = select_save_path(default_name=f"{Path(self.selected_images).stem}_img_to_pdf.pdf")
+        output_path = select_save_path(default_name="img_to_pdf.pdf")
 
         if not output_path:
             self.update_status(
@@ -585,10 +583,10 @@ class ImagesToPdfPage(BasePage):
             return
 
         success = images_to_pdf(
-            input_path=self.selected_images,
+            input_paths=self.selected_images,
             output_path=output_path,
-            page_size=self.page_size,
-            orientation=self.orientation
+            page_size=self.page_size.get(),
+            orientation=self.orientation.get()
         )
 
         self._display_result(success)
@@ -612,8 +610,10 @@ class ImagesToPdfPage(BasePage):
 
 
     def _clear_selection(self):
-        self.selected_files.clear()
+        self.selected_images.clear()
         self._refresh_images_list()
+
+        self.create_pdf_button.config(state="disabled")
 
 
     def _show_validation_message(
