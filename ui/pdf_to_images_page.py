@@ -1,9 +1,9 @@
 import tkinter as tk
 from pathlib import Path
-
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
-
+from utils.helpers import count_pdf_pages 
+from utils.file_dialog import select_pdf_file, select_save_path
 
 class PdfToImagesPage(BasePage):
 
@@ -390,15 +390,44 @@ class PdfToImagesPage(BasePage):
 
 
     def _select_pdf(self):
-        pass
+        file = select_pdf_file()
+
+        if not file:
+            return
+
+        self.selected_file = file
+        self.pdf_name.config(text=Path(file).name)
+
+        self._load_pdf_info()
 
 
     def _load_pdf_info(self):
-        pass
+        try:
+            self.total_pages = count_pdf_pages(self.selected_file)
+
+        except (ValueError, OSError) as error:
+            self.selected_file = None
+            self.total_pages = 0
+
+            self.pdf_name.config(text="No PDF selected")
+            self.convert_button.config(state="disabled")
+
+            self._show_validation_message(
+                f"Could not read the selected PDF: {error}"
+            )
+
+            return
+
+        self._clear_validation_message()
+        self._update_spinbox_ranges()
+        self.update_default_status()
+
+        self.convert_button.config(state="normal")
 
 
     def _on_mode_change(self):
-        pass
+        self._clear_validation_message()
+        self._update_range_section()
 
 
     def _update_spinbox_ranges(self):
@@ -452,11 +481,7 @@ class PdfToImagesPage(BasePage):
             )
             return
 
-        page_text = (
-            "page"
-            if self.total_pages == 1
-            else "pages"
-        )
+        page_text = ("page" if self.total_pages == 1 else "pages")
 
         self.status_label.config(
             text=f"Selected PDF: {self.total_pages} {page_text}",
