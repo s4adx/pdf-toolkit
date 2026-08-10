@@ -493,7 +493,6 @@ class PdfToImagesPage(BasePage):
         self._clear_validation_message()
     
         return True
-    
 
 
     def _process_pdf(self):
