@@ -15,9 +15,7 @@ def pdf_to_images(input_path, output_folder, image_format, pages):
 
         for page_index in sorted(pages):
             page = pdf[page_index]
-
             pixmap = page.get_pixmap(dpi=200)
-
             output_path = output_folder/f"page_{page_index + 1}.{image_format}"
 
             if image_format == "jpg":

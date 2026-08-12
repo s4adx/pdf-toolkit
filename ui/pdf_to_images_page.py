@@ -3,7 +3,8 @@ from pathlib import Path
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
 from utils.helpers import count_pdf_pages 
-from utils.file_dialog import select_pdf_file, select_save_path
+from utils.file_dialog import select_pdf_file, create_output_folder
+from backend.pdf_to_images import pdf_to_images
 
 class PdfToImagesPage(BasePage):
 
@@ -496,15 +497,68 @@ class PdfToImagesPage(BasePage):
 
 
     def _process_pdf(self):
-        pass
+        if not self._validate_settings():
+            return
 
+        selected_mode = self.page_mode.get()
+        image_format = self.image_format.get()
 
+        self._clear_validation_message()
+
+        output_path = create_output_folder(default_name=f"{Path(self.selected_file).stem}_pdf_to_images.pdf")
+
+        if not output_path:
+            self.update_status(
+                "Operation cancelled",
+                Colors.ERROR
+            )
+            return
+
+        if selected_mode == "all":
+            pages = set(range(0, self.total_pages))
+
+            success = pdf_to_images(
+                input_path=self.selected_file,
+                output_folder=output_path,
+                image_format=image_format,
+                pages=pages
+            )
+
+        elif selected_mode == "range":
+            start_page = int(self.start_page_spinbox.get())
+            end_page = int(self.end_page_spinbox.get())
+    
+            pages = set(range(start_page, end_page+1))
+    
+            success = pdf_to_images(
+                input_path=self.selected_file,
+                output_folder=output_path,
+                image_format=image_format,
+                pages=pages
+            )
+
+        self._display_result(success)
+        
+        
     def _display_result(self, success):
-        pass
+        if success:
+            self._clear_selection()
+    
+            self.update_status(
+                "PDF pages converted into images successfully.", 
+                Colors.SUCCESS
+            )
+    
+        else:
+            self.update_status(
+                "Failed to convert PDF pages into images.", 
+                Colors.ERROR
+            )
 
 
     def _clear_selection(self):
-        pass
+        self.selected_file = None
+        self.total_pages = 0
 
 
     def _show_validation_message(
