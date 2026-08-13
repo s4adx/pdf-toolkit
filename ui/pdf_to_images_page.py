@@ -505,7 +505,7 @@ class PdfToImagesPage(BasePage):
 
         self._clear_validation_message()
 
-        output_path = create_output_folder(default_name=f"{Path(self.selected_file).stem}_pdf_to_images.pdf")
+        output_path = create_output_folder(default_name=f"{Path(self.selected_file).stem}_pdf_to_images")
 
         if not output_path:
             self.update_status(
@@ -515,7 +515,7 @@ class PdfToImagesPage(BasePage):
             return
 
         if selected_mode == "all":
-            pages = set(range(0, self.total_pages))
+            pages = set(range(self.total_pages))
 
             success = pdf_to_images(
                 input_path=self.selected_file,
@@ -528,7 +528,7 @@ class PdfToImagesPage(BasePage):
             start_page = int(self.start_page_spinbox.get())
             end_page = int(self.end_page_spinbox.get())
     
-            pages = set(range(start_page, end_page+1))
+            pages = set(range(start_page-1, end_page))
     
             success = pdf_to_images(
                 input_path=self.selected_file,
@@ -560,12 +560,22 @@ class PdfToImagesPage(BasePage):
         self.selected_file = None
         self.total_pages = 0
 
+        self.pdf_name.config(
+            text="No PDF selected",
+            fg=Colors.TEXT_SECONDARY
+        )
 
-    def _show_validation_message(
-        self,
-        message,
-        color=Colors.ERROR
-    ):
+        self.image_format.set("png")
+        self.page_mode.set("all")
+        self._update_range_section()
+
+        self.convert_button.config(state="disabled")
+
+        self._clear_validation_message()
+        self.update_default_status()
+
+
+    def _show_validation_message(self,message,color=Colors.ERROR):
         self.validation_label.config(
             text=message,
             fg=color
