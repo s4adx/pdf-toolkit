@@ -330,11 +330,28 @@ class CompressPage(BasePage):
 
 
     def _validate_settings(self):
-        pass
+        if not self.selected_file:
+            self._show_validation_message(
+                "Please select a PDF file."
+            )
+            return False
 
+        if self.compression_level.get() not in ("low", "recommended", "high"):
+            self._show_validation_message(
+                "Select a valid compression level."
+            )
+            return False
+
+        self._clear_validation_message()
+
+        return True
+            
 
     def _process_pdf(self):
-        pass
+        if not self._validate_settings():
+            return
+
+        print("Validation successful")
 
 
     def _display_result(self, success):
@@ -342,8 +359,20 @@ class CompressPage(BasePage):
 
 
     def _clear_selection(self):
-        pass
+        self.selected_file = None
+        self.total_pages = 0
 
+        self.pdf_name.config(
+            text="No PDF selected",
+            fg=Colors.TEXT_SECONDARY
+        )
+
+        self.compression_level.set("recommended")
+        self.compress_button.config(state="disabled")
+
+        self._clear_validation_message()
+        self.update_default_status()
+        
 
     def _show_validation_message(
         self,
