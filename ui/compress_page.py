@@ -1,11 +1,10 @@
 import tkinter as tk
 from pathlib import Path
-
 from ui.base_page import BasePage
 from utils.constants import Colors, Fonts
-from utils.file_dialog import select_pdf_file
+from utils.file_dialog import select_pdf_file, select_save_path
 from utils.helpers import count_pdf_pages
-
+from backend.compress import compress_pdf
 
 class CompressPage(BasePage):
 
@@ -351,11 +350,40 @@ class CompressPage(BasePage):
         if not self._validate_settings():
             return
 
-        print("Validation successful")
+        selected_level = self.compression_level.get()
+
+        output_path = select_save_path()
+
+        if not output_path:
+            self.update_status(
+                "Operation cancelled",
+                Colors.ERROR
+            )
+            return
+
+        success = compress_pdf(
+            input_path=self.selected_file,
+            output_path=output_path,
+            compression_level=selected_level
+        )
+
+        self._display_result(success)
 
 
     def _display_result(self, success):
-        pass
+        if success:
+            self._clear_selection()
+    
+            self.update_status(
+                "PDF compressed successfully.", 
+                Colors.SUCCESS
+            )
+    
+        else:
+            self.update_status(
+                "Failed to compress the PDF.", 
+                Colors.ERROR
+            )
 
 
     def _clear_selection(self):
