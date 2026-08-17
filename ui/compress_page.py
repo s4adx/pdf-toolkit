@@ -14,7 +14,7 @@ class CompressPage(BasePage):
         self.selected_file = None
         self.total_pages = 0
 
-        self.create_header(
+        self.create_header( 
             title="Compress PDF",
             subtitle="Reduce PDF file size while maintaining useful document quality."
         )
