@@ -352,7 +352,7 @@ class CompressPage(BasePage):
 
         selected_level = self.compression_level.get()
 
-        output_path = select_save_path()
+        output_path = select_save_path(default_name=f"{Path(self.selected_file).stem}_compressed.pdf")
 
         if not output_path:
             self.update_status(
