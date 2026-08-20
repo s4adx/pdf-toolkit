@@ -24,6 +24,7 @@ class ImagesToPdfPage(BasePage):
 
         self.create_status_bar()
         self.update_default_status()
+        self._bind_events()
 
 
     def _create_content_layout(self):
@@ -122,6 +123,7 @@ class ImagesToPdfPage(BasePage):
         self.images_listbox = tk.Listbox(
             list_frame,
             height=6,
+            selectmode="extended",
             bg=Colors.BACKGROUND,
             fg=Colors.TEXT_PRIMARY,
             selectbackground=Colors.PRIMARY,
@@ -438,31 +440,43 @@ class ImagesToPdfPage(BasePage):
         self._clear_validation_message()
         self._refresh_images_list()
 
-        self.create_pdf_button.config(state="normal")
 
-
-    def _remove_selected(self):
+    def _remove_selected(self, event=None):
         selection = self.images_listbox.curselection()
 
         if not selection:
-            return
+            return "break"
 
-        index = selection[0]
+        for index in reversed(selection):
+            if index < len(self.selected_images):
+                self.selected_images.pop(index)
 
-        if index >= len(self.selected_images):
-            return
-
-        self.selected_images.pop(index) 
         self._refresh_images_list()
+
+        return "break"
 
 
     def _clear_images(self):
+        if not self.selected_images:
+            return
+
         self.selected_images.clear()
 
         self._refresh_images_list()
 
 
-    def _move_up(self):
+    def _select_all(self, event=None):
+        if not self.selected_images:
+            return "break"
+
+        self.images_listbox.selection_set(0, tk.END)
+
+        self._update_buttons()
+
+        return "break"
+
+
+    def _move_up(self, event=None):
         selection = self.images_listbox.curselection()
         
         if not selection:
@@ -478,8 +492,10 @@ class ImagesToPdfPage(BasePage):
         self._refresh_images_list()
         self._refocus_listbox(index - 1)
 
+        return "break"
 
-    def _move_down(self):
+
+    def _move_down(self, event=None):
         selection = self.images_listbox.curselection()
         
         if not selection:
@@ -494,6 +510,8 @@ class ImagesToPdfPage(BasePage):
 
         self._refresh_images_list()
         self._refocus_listbox(index + 1)
+
+        return "break"
 
 
     def _swap_items(self, a, b):
@@ -510,6 +528,24 @@ class ImagesToPdfPage(BasePage):
         self.images_listbox.see(new_index)
         self.images_listbox.focus_set()
 
+        self._update_buttons()
+
+
+    def _bind_events(self):
+        self.images_listbox.bind("<Control-a>",self._select_all)
+
+        self.images_listbox.bind("<Delete>",self._remove_selected)
+
+        self.images_listbox.bind("<Control-Up>",self._move_up)
+
+        self.images_listbox.bind("<Control-Down>",self._move_down)
+
+        self.images_listbox.bind("<Up>",self._update_buttons)
+
+        self.images_listbox.bind("<Down>",self._update_buttons)
+
+        self.images_listbox.bind("<ButtonRelease-1>",self._update_buttons)
+
 
     def _refresh_images_list(self):
         self.images_listbox.delete(0, tk.END)
@@ -519,11 +555,8 @@ class ImagesToPdfPage(BasePage):
         
         if not self.selected_images:
             self.images_listbox.insert(tk.END, "No Image Selected.")
-            self.create_pdf_button.config(state="disabled")
 
-        else:
-            self.create_pdf_button.config(state="normal")
-
+        self._update_buttons()
         self.update_default_status()
 
 
@@ -608,19 +641,38 @@ class ImagesToPdfPage(BasePage):
             )
 
 
+    def _update_buttons(self, event=None):
+        has_images = bool(self.selected_images)
+        selection = self.images_listbox.curselection()
+
+        self.remove_button.config(state="normal" if selection else "disabled")
+
+        self.clear_button.config(state="normal" if has_images else "disabled")
+
+        self.create_pdf_button.config(state="normal" if has_images else "disabled")
+
+        if not selection:
+            self.move_up_button.config(state="disabled")
+            self.move_down_button.config(state="disabled")
+            return
+
+        index = selection[0]
+
+        self.move_up_button.config(state="normal" if index > 0 else "disabled")
+
+        self.move_down_button.config(
+            state="normal"
+            if index < len(self.selected_images) - 1
+            else "disabled"
+        )    
+
 
     def _clear_selection(self):
         self.selected_images.clear()
         self._refresh_images_list()
 
-        self.create_pdf_button.config(state="disabled")
 
-
-    def _show_validation_message(
-        self,
-        message,
-        color=Colors.ERROR
-    ):
+    def _show_validation_message(self,message,color=Colors.ERROR):
         self.validation_label.config(
             text=message,
             fg=color
