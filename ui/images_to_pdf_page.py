@@ -531,20 +531,27 @@ class ImagesToPdfPage(BasePage):
         self._update_buttons()
 
 
+    def _clear_list_selection(self, event=None):
+        self.images_listbox.selection_clear(0, tk.END)
+        return "break"
+
+
     def _bind_events(self):
-        self.images_listbox.bind("<Control-a>",self._select_all)
+        self.images_listbox.bind("<Control-a>", self._select_all)
 
-        self.images_listbox.bind("<Delete>",self._remove_selected)
+        self.images_listbox.bind("<Delete>", self._remove_selected)
 
-        self.images_listbox.bind("<Control-Up>",self._move_up)
+        self.images_listbox.bind("<Control-Up>", self._move_up)
 
-        self.images_listbox.bind("<Control-Down>",self._move_down)
+        self.images_listbox.bind("<Control-Down>", self._move_down)
 
-        self.images_listbox.bind("<Up>",self._update_buttons)
+        self.images_listbox.bind("<Up>", self._update_buttons)
 
-        self.images_listbox.bind("<Down>",self._update_buttons)
+        self.images_listbox.bind("<Down>", self._update_buttons)
 
-        self.images_listbox.bind("<ButtonRelease-1>",self._update_buttons)
+        self.images_listbox.bind("<ButtonRelease-1>", self._update_buttons)
+
+        self.images_listbox.bind("<Escape>", self._clear_list_selection)
 
 
     def _refresh_images_list(self):

@@ -251,40 +251,21 @@ class MergePage(BasePage):
 
 
     def _bind_events(self):
-        self.file_listbox.bind(
-            "<Delete>",
-            lambda event: self._remove_selected()
-        )
+        self.file_listbox.bind("<Delete>",lambda event: self._remove_selected())
 
-        self.file_listbox.bind(
-            "<BackSpace>",
-            lambda event: self._remove_selected()
-        )
+        self.file_listbox.bind("<BackSpace>",lambda event: self._remove_selected())
 
-        self.file_listbox.bind(
-            "<Control-a>",
-            self._select_all
-        )
+        self.file_listbox.bind("<Control-a>",self._select_all)
 
-        self.file_listbox.bind(
-            "<Control-A>",
-            self._select_all
-        )
+        self.file_listbox.bind("<Control-A>",self._select_all)
 
-        self.file_listbox.bind(
-            "<Control-Up>",
-            lambda event: self._move_up()
-        )
+        self.file_listbox.bind("<Control-Up>", lambda event: self._move_up())
 
-        self.file_listbox.bind(
-            "<Control-Down>",
-            lambda event: self._move_down()
-        )
+        self.file_listbox.bind("<Control-Down>", lambda event: self._move_down())
 
-        self.file_listbox.bind(
-            "<<ListboxSelect>>",
-            lambda event: self._update_buttons()
-        )
+        self.file_listbox.bind("<<ListboxSelect>>", lambda event: self._update_buttons())
+
+        self.file_listbox.bind("<Escape>", self._clear_list_selection)
 
 
     def _add_pdfs(self):
@@ -376,6 +357,11 @@ class MergePage(BasePage):
         self.file_listbox.focus_set()
 
         self._update_buttons()
+
+
+    def _clear_list_selection(self, event=None):
+        self.file_listbox.selection_clear(0, tk.END)
+        return "break"
 
 
     def _select_all(self, event=None):
