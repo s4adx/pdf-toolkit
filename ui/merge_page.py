@@ -223,7 +223,6 @@ class MergePage(BasePage):
         )
 
 
-
     def _create_action_section(self):
         action_frame = tk.Frame(
             self.content_frame,
@@ -311,10 +310,7 @@ class MergePage(BasePage):
         if index <= 0 or index >= len(self.selected_files):
             return
 
-        self._swap_items(
-            index,
-            index - 1
-        )
+        self._swap_items(index, index - 1)
 
         self._refresh_files_list()
         self._refocus_listbox(index - 1)
@@ -331,10 +327,7 @@ class MergePage(BasePage):
         if index < 0 or index >= len(self.selected_files) - 1:
             return
 
-        self._swap_items(
-            index,
-            index + 1
-        )
+        self._swap_items(index, index + 1)
 
         self._refresh_files_list()
         self._refocus_listbox(index + 1)
@@ -419,13 +412,9 @@ class MergePage(BasePage):
         index = selection[0]
 
         if index > 0:
-            self.move_up_button.config(
-                state="normal"
-            )
+            self.move_up_button.config(state="normal")
         else:
-            self.move_up_button.config(
-                state="disabled"
-            )
+            self.move_up_button.config(state="disabled")
 
         if index < len(self.selected_files) - 1:
             self.move_down_button.config(

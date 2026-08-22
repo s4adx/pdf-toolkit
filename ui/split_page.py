@@ -363,7 +363,7 @@ class SplitPage(BasePage):
         self._update_spinbox_ranges()
         self.update_default_status()
 
-        self.split_button.config(state="normal")
+        self._update_action_button_state()
 
 
     def _update_spinbox_ranges(self):
@@ -410,6 +410,7 @@ class SplitPage(BasePage):
         self._clear_validation_message()
         self._update_settings_section()
         self._update_action_button()
+        self._update_action_button_state()        
 
 
     def _update_settings_section(self):
@@ -717,6 +718,18 @@ class SplitPage(BasePage):
 
         self._clear_validation_message()
         self.update_default_status()
+
+
+    def _update_action_button_state(self):
+        if not self.selected_file:
+            self.split_button.config(state="disabled")
+            return
+
+        if self.split_mode.get() == "split" and self.total_pages < 2:
+            self.split_button.config(state="disabled")
+            return
+
+        self.split_button.config(state="normal")
 
 
     def _show_validation_message(self, message, color=Colors.ERROR):
