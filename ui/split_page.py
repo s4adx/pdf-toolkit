@@ -410,7 +410,7 @@ class SplitPage(BasePage):
         self._clear_validation_message()
         self._update_settings_section()
         self._update_action_button()
-        self._update_action_button_state()        
+        self._update_action_button_state()         
 
 
     def _update_settings_section(self):
