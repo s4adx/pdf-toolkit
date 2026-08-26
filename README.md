@@ -1,29 +1,101 @@
 # PDF Toolkit
 
-A desktop PDF utility application built with Python and Tkinter for performing common PDF operations through a simple and user-friendly interface.
+A desktop application built using **Python** and **Tkinter** that provides a collection of tools for working with PDF files and images through a simple and user-friendly interface.
+
+---
+
+## Screenshot
+
+![PDF Toolkit](screenshots/home.png)
+
+---
 
 ## Features
 
-PDF Toolkit currently supports:
+* Merge multiple PDF files into a single PDF
+* Split PDFs into separate documents
+* Extract a specific range of pages from a PDF
+* Split every page of a PDF into individual files
+* Rotate PDF pages
+* Delete selected pages from a PDF
+* Compress PDF files
+* Convert images into a single PDF
+* Convert PDF pages into images
+* Protect PDF files with password protection
+* Input validation and error handling
+* Simple and user-friendly Tkinter interface
+* File ordering controls for PDF and image operations
+* Keyboard shortcuts for common list operations
 
-- **Merge PDFs** — Combine multiple PDF files into a single document.
-- **Split PDF** — Split a PDF after a selected page.
-- **Extract Pages** — Extract a selected range of pages into a new PDF.
-- **Split Every Page** — Save each PDF page as an individual PDF file.
-- **Rotate PDF** — Rotate selected PDF pages.
-- **Delete Pages** — Remove selected pages from a PDF.
-- **Images to PDF** — Combine multiple images into a single PDF.
-- **PDF to Images** — Convert PDF pages into image files.
-- **Compress PDF** — Reduce PDF file size using different compression levels.
-- **Protect PDF** — Protect PDF files with password-based encryption.
+---
 
-## Tech Stack
+## Technologies Used
 
-- **Python**
-- **Tkinter** — Desktop graphical user interface
-- **pypdf** — PDF manipulation
-- **PyMuPDF** — PDF rendering and image-related operations
-- **Pillow** — Image processing
+* Python 3.13+
+* Tkinter
+* pypdf
+* Pillow
+* PyMuPDF
+
+---
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/s4adx/pdf-toolkit.git
+
+cd pdf-toolkit
+```
+
+---
+
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+---
+
+### 3. Activate the Virtual Environment
+
+#### Windows PowerShell
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+#### Windows Command Prompt
+
+```cmd
+.venv\Scripts\activate.bat
+```
+
+---
+
+### 4. Install Required Packages
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Running the Application
+
+Once everything is installed, run:
+
+```bash
+python main.py
+```
+
+The PDF Toolkit window should open.
+
+Select the required PDF or image operation from the home page and follow the options provided for that tool.
+
+---
 
 ## Project Structure
 
@@ -33,6 +105,7 @@ pdf-toolkit/
 ├── backend/
 │   ├── compress.py
 │   ├── delete.py
+│   ├── extract.py
 │   ├── images_to_pdf.py
 │   ├── merge.py
 │   ├── pdf_to_images.py
@@ -41,10 +114,10 @@ pdf-toolkit/
 │   └── split.py
 │
 ├── ui/
-│   ├── app.py
 │   ├── base_page.py
 │   ├── compress_page.py
 │   ├── delete_page.py
+│   ├── extract_page.py
 │   ├── home_page.py
 │   ├── images_to_pdf_page.py
 │   ├── merge_page.py
@@ -52,97 +125,27 @@ pdf-toolkit/
 │   ├── pdf_to_images_page.py
 │   ├── protect_page.py
 │   ├── rotate_page.py
-│   ├── split_page.py
-│   └── tools_card.py
+│   └── split_page.py
 │
 ├── utils/
 │   ├── constants.py
 │   ├── file_dialog.py
-│   ├── helpers.py
-│   └── validators.py
+│   └── helpers.py
+│
+├── screenshots/
+│   └── screenshot.png
 │
 ├── main.py
 ├── requirements.txt
+├── .gitignore
 └── README.md
 ```
 
-## Installation
+---
 
-### 1. Clone the repository
+## Notes
 
-```bash
-git clone <your-repository-url>
-cd pdf-toolkit
-```
-
-### 2. Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-### 3. Activate the virtual environment
-
-**Windows:**
-
-```bash
-.venv\Scripts\activate
-```
-
-**Linux / macOS:**
-
-```bash
-source .venv/bin/activate
-```
-
-### 4. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-## Running the Application
-
-Run the following command from the project directory:
-
-```bash
-python main.py
-```
-
-The PDF Toolkit application will open in a desktop window.
-
-## Usage
-
-1. Launch the application.
-2. Select the required PDF tool from the home page.
-3. Choose the required files.
-4. Configure the available settings.
-5. Perform the operation.
-6. Choose where to save the generated PDF or output files.
-
-## Design
-
-The application follows a modular structure:
-
-- **UI layer** handles the interface, user interaction, validation, and status messages.
-- **Backend layer** handles PDF and image processing.
-- **Utils layer** contains reusable helpers, constants, and file-dialog functionality.
-
-This separation keeps the individual features organized and makes the application easier to maintain and extend.
-
-## Requirements
-
-- Python 3.x
-- Windows / Linux / macOS
-- Required Python packages listed in `requirements.txt`
-
-## Future Improvements
-
-Possible future improvements include:
-
-- PDF preview functionality
-- Drag-and-drop file support
-- Progress indicators for large files
-- More advanced PDF compression options
-- Additional PDF utilities
-- Improved error reporting
+* The application is designed as a lightweight desktop utility for common PDF-related tasks.
+* Required Python packages are listed in `requirements.txt`.
+* Make sure Python 3.13 or a compatible version is installed before running the application.
+* Output files are saved to locations selected by the user through the application.
