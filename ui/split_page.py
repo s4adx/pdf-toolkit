@@ -137,7 +137,8 @@ class SplitPage(BasePage):
             row,
             text="Browse",
             width=10,
-            command=self._select_pdf
+            command=self._select_pdf,
+            cursor="hand2"
         )
 
         self.browse_button.pack(side="right")
