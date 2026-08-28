@@ -438,7 +438,7 @@ class MergePage(BasePage):
 
         if not save_path:
             self.update_status(
-                "Merge cancelled.",
+                "Operation cancelled.",
                 Colors.ERROR
             )
             return
@@ -448,17 +448,21 @@ class MergePage(BasePage):
             output_path=save_path
         )
 
+        self.display_result(success)
+
+
+    def display_result(self, success):
         if success:
+            self._clear_selection()
+            
             self.update_status(
-                "PDFs merged successfully.",
+                "PDFs merged successfully.", 
                 Colors.SUCCESS
             )
 
-            self._clear_selection()
-
         else:
             self.update_status(
-                "Failed to merge PDFs.",
+                "Failed to merge PDFs.", 
                 Colors.ERROR
             )
 
